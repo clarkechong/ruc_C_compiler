@@ -8,7 +8,6 @@
 
   #include "parser.tab.hpp"
 
-  // Suppress warning about unused function
   [[maybe_unused]] static void yyunput (int c, char * yy_bp );
 %}
 
@@ -19,8 +18,16 @@ E	  [Ee][+-]?{D}+
 FS  (f|F|l|L)
 IS  (u|U|l|L)*
 
+%x COMMENT
+
 %%
-"/*"			{/* consumes comment - TODO you might want to process and emit it in your assembly for debugging */}
+
+"/*"                { BEGIN COMMENT; }
+<COMMENT>[^*/]+     { /* ignore anything that is not '*' or '/' */ }
+<COMMENT>("*"+)"/"  { BEGIN INITIAL; }
+<COMMENT>[*/]       { /* residual stuff, if required */ }
+
+"//"[^\n]*"\n"      { /* single line comment */ }
 
 "auto"			{return(AUTO);}
 "break"			{return(BREAK);}
