@@ -1,6 +1,7 @@
 bin/
 build/
-.vscode
+.vscode/
+coverage/
 *.o
 *.tab.hpp
 *.tab.cpp
@@ -8,6 +9,5 @@ build/
 *.output
 *.gcno
 *.gcda
-coverage/
 *.d
 *.pyc

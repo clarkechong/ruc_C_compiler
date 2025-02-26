@@ -4,6 +4,10 @@ CPPFLAGS += -std=c++20
 CPPFLAGS += -I include/
 CPPFLAGS += -I src/generated
 
+# $< expands to the first listed dependency
+# $@ expands to the build target path
+# -c to specify only compilation, not linking, and produces obj .o file
+
 .PHONY: default clean
 
 default:
@@ -15,10 +19,6 @@ build/%.o: src/%.cpp
 build/%.o: src/generated/%.cpp
 	@mkdir -p $(@D)
 	g++ ${CPPFLAGS} -c $< -o $@
-
-# $< expands to the first listed dependency
-# $@ expands to the build target path
-# -c to specify only compilation, not linking, and produces obj .o file
 
 src/generated/lexer.yy.cpp: src/lexer.flex
 	@mkdir -p $(@D)

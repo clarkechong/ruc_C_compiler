@@ -1,6 +1,6 @@
 /*
     TEST LEXER FUNCTIONALITY:
-        - READ in from input txt & optionally specify an output txt
+        - READ in from input txt
         - PRINT yytext, which is simply the text associated with any given token retrieved by yylex()
 */
 
