@@ -1,13 +1,13 @@
 %code requires{
     #include "ast.hpp"
 
-	  using namespace ast;
+	using namespace ast;
 
     extern Node* g_root;
     extern FILE* yyin;
     int yylex(void);
     void yyerror(const char*);
-	  int yylex_destroy(void);
+	int yylex_destroy(void);
 }
 
 // Represents the value associated with any kind of AST node.
@@ -34,12 +34,13 @@
 %token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
 
 %start translation_unit
+
 %%
 
 primary_expression
 	: IDENTIFIER
 	| INT_CONSTANT
-  | FLOAT_CONSTANT
+	| FLOAT_CONSTANT
 	| STRING_LITERAL
 	| '(' expression ')'
 	;
@@ -216,20 +217,15 @@ type_specifier
 	| DOUBLE
 	| SIGNED
 	| UNSIGNED
-	| struct_or_union_specifier
+	| struct_specifier
 	| enum_specifier
 	| TYPE_NAME
 	;
 
-struct_or_union_specifier
-	: struct_or_union IDENTIFIER '{' struct_declaration_list '}'
-	| struct_or_union '{' struct_declaration_list '}'
-	| struct_or_union IDENTIFIER
-	;
-
-struct_or_union
-	: STRUCT
-	| UNION
+struct_specifier
+	: STRUCT IDENTIFIER '{' struct_declaration_list '}'
+	| STRUCT '{' struct_declaration_list '}'
+	| STRUCT IDENTIFIER
 	;
 
 struct_declaration_list
@@ -439,7 +435,19 @@ function_definition
 	;
 
 %%
-#include <stdio.h>
 
-extern char yytext[];
-extern int column;
+Node* g_root;
+
+NodePtr ParseAST(std::string file_name)
+{
+  yyin = fopen(file_name.c_str(), "r");
+  if(yyin == NULL){
+    std::cerr << "Couldn't open input file: " << file_name << std::endl;
+    exit(1);
+  }
+  g_root = nullptr;
+  yyparse();
+  fclose(yyin);
+  yylex_destroy();
+  return NodePtr(g_root);
+}
