@@ -9,9 +9,11 @@ CPPFLAGS += -I src/generated
 default:
 
 build/%.o: src/%.cpp
+	@mkdir -p $(@D)
 	g++ ${CPPFLAGS} -c $< -o $@
 
 build/%.o: src/generated/%.cpp
+	@mkdir -p $(@D)
 	g++ ${CPPFLAGS} -c $< -o $@
 
 # $< expands to the first listed dependency
@@ -19,12 +21,15 @@ build/%.o: src/generated/%.cpp
 # -c to specify only compilation, not linking, and produces obj .o file
 
 src/generated/lexer.yy.cpp: src/lexer.flex
+	@mkdir -p $(@D)
 	flex -o src/generated/lexer.yy.cpp src/lexer.flex
 
 src/generated/parser.tab.hpp src/generated/parser.tab.cpp: src/parser.y
+	@mkdir -p $(@D)
 	bison -d src/parser.y -o src/generated/parser.tab.cpp
 
 bin/lexer_main: src/generated/parser.tab.hpp build/lexer_main.o build/lexer.yy.o build/parser.tab.o 
+	@mkdir -p $(@D)
 	g++ ${CPPFLAGS} $^ -o $@
 
 clean:
