@@ -12,4 +12,5 @@ void IntConstant::Print(std::ostream& stream) const
     stream << value_;
 }
 
+
 } // namespace ast

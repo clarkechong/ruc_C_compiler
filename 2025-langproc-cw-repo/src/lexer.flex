@@ -8,7 +8,6 @@
 
   #include "parser.tab.hpp"
 
-  // Suppress warning about unused function
   [[maybe_unused]] static void yyunput (int c, char * yy_bp );
 %}
 
@@ -19,8 +18,16 @@ E	  [Ee][+-]?{D}+
 FS  (f|F|l|L)
 IS  (u|U|l|L)*
 
+%x COMMENT
+
 %%
-"/*"			{/* consumes comment - TODO you might want to process and emit it in your assembly for debugging */}
+
+"/*"                { BEGIN COMMENT; }
+<COMMENT>[^*/]+     { /* ignore anything that is not '*' or '/' */ }
+<COMMENT>("*"+)"/"  { BEGIN INITIAL; }
+<COMMENT>[*/]       { /* residual stuff, if required */ }
+
+"//"[^\n]*"\n"      { /* single line comment */ }
 
 "auto"			{return(AUTO);}
 "break"			{return(BREAK);}
@@ -55,18 +62,18 @@ IS  (u|U|l|L)*
 "volatile"	{return(VOLATILE);}
 "while"			{return(WHILE);}
 
-{L}({L}|{D})*		{yylval.string = new std::string(yytext); return(IDENTIFIER);}
+{L}({L}|{D})*		        {yylval.string = new std::string(yytext); return(IDENTIFIER);}
 
-0[xX]{H}+{IS}?		{yylval.number_int = (int)strtol(yytext, NULL, 0); return(INT_CONSTANT);}
-0{D}+{IS}?		    {yylval.number_int = (int)strtol(yytext, NULL, 0); return(INT_CONSTANT);}
-{D}+{IS}?		      {yylval.number_int = (int)strtol(yytext, NULL, 0); return(INT_CONSTANT);}
-L?'(\\.|[^\\'])+'	{yylval.number_int = (int)strtol(yytext, NULL, 0); return(INT_CONSTANT);}
+0[xX]{H}+{IS}?		      {yylval.number_int = (int)strtol(yytext, NULL, 0); return(INT_CONSTANT);}
+0{D}+{IS}?		          {yylval.number_int = (int)strtol(yytext, NULL, 0); return(INT_CONSTANT);}
+{D}+{IS}?		            {yylval.number_int = (int)strtol(yytext, NULL, 0); return(INT_CONSTANT);}
+L?'(\\.|[^\\'])+'	      {yylval.number_int = (int)strtol(yytext, NULL, 0); return(INT_CONSTANT);}
 
 {D}+{E}{FS}?		        {yylval.number_float = strtod(yytext, NULL); return(FLOAT_CONSTANT);}
 {D}*"."{D}+({E})?{FS}?	{yylval.number_float = strtod(yytext, NULL); return(FLOAT_CONSTANT);}
 {D}+"."{D}*({E})?{FS}?	{yylval.number_float = strtod(yytext, NULL); return(FLOAT_CONSTANT);}
 
-L?\"(\\.|[^\\"])*\"	{/* TODO process string literal */; return(STRING_LITERAL);}
+L?\"(\\.|[^\\"])*\"	    {/* TODO process string literal */; return(STRING_LITERAL);}
 
 "..."      {return(ELLIPSIS);}
 ">>="			 {return(RIGHT_ASSIGN);}

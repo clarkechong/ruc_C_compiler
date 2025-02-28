@@ -8,14 +8,14 @@
 
 namespace ast {
 
-class Variable : public Node
+class InitDecl : public Node
 {
 private:
+    const TypeSpecifier declaration_specifiers_;
     NodePtr declarator_;
-    TypeSpecifier declaration_specifiers_;
-
+    NodePtr value_;
 public:
-    Variable(NodePtr declarator) : declarator_(std::move(declarator)){};
+    InitDecl(TypeSpecifier declaration_specifiers, NodePtr declarator, NodePtr value) : declaration_specifiers_(declaration_specifiers), declarator_(std::move(declarator)),value_(std::move(value)){};
 
     void EmitRISC(std::ostream& stream, Context& context) const override;
 

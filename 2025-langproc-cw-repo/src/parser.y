@@ -37,7 +37,7 @@
 %type <node> translation_unit external_declaration function_definition primary_expression postfix_expression
 %type <node> unary_expression cast_expression multiplicative_expression additive_expression shift_expression relational_expression
 %type <node> equality_expression and_expression exclusive_or_expression inclusive_or_expression logical_and_expression logical_or_expression
-%type <node> conditional_expression assignment_expression expression declarator direct_declarator statement compound_statement jump_statement
+%type <node> conditional_expression assignment_expression expression declarator direct_declarator statement compound_statement jump_statement declaration Assignment
 
 %type <node_list> statement_list
 
@@ -81,6 +81,18 @@ declarator
 	: direct_declarator { $$ = $1; }
 	;
 
+declaration
+	:declaration_specifiers declarator ';' {
+		$$ = new InitDecl($1,NodePtr($2),NULL);
+	}
+	;
+
+Assignment
+	: declarator '=' expression{
+		$$ = new InitDecl(NULL,NodePtr($1),NodePtr($3));
+	}
+
+
 direct_declarator
 	: IDENTIFIER {
 		$$ = new Identifier(std::move(*$1));
@@ -101,6 +113,7 @@ compound_statement
 
 statement_list
 	: statement { $$ = new NodeList(NodePtr($1)); }
+	| declaration { $$ = new NodeList(NodePtr($1)); }
 	| statement_list statement { $1->PushBack(NodePtr($2)); $$=$1; }
 	;
 

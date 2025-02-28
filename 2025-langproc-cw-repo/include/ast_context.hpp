@@ -16,7 +16,7 @@ class Context {
     public:
         Context();
 
-        void AllocateVariable(const std::string& name) ;
+        void AllocateVariable(const std::string& name, TypeSpecifier type) ;
 
         int GetVariableOffset(const std::string& name) const ;
 };

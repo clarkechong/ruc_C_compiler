@@ -31,4 +31,5 @@ void NodeList::Print(std::ostream& stream) const
     }
 }
 
+
 }
