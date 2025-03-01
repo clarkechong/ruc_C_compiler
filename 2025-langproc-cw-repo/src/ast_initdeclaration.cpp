@@ -10,7 +10,10 @@ void InitDecl::EmitRISC(std::ostream& stream, Context& context) const
 
 void InitDecl::Print(std::ostream& stream) const
 {
-    stream << declaration_specifiers_ << " " << declarator_ << " ;"<<std::endl;
+    //context.AllocateVariable(declarator_,value_);
+    stream << declaration_specifiers_ << " ";
+    declarator_-> Print(stream) ;
+    stream << ";"<<std::endl;
 }
 
 

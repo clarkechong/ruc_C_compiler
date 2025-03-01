@@ -88,8 +88,8 @@ declaration
 	;
 
 Assignment
-	: declarator '=' expression{
-		$$ = new InitDecl(NULL,NodePtr($1),NodePtr($3));
+	: declarator '=' expression ';' {
+		$$ = new Assignment(NodePtr($1),NodePtr($3));
 	}
 
 
@@ -114,7 +114,10 @@ compound_statement
 statement_list
 	: statement { $$ = new NodeList(NodePtr($1)); }
 	| declaration { $$ = new NodeList(NodePtr($1)); }
+	| Assignment { $$ = new NodeList(NodePtr($1)); }
 	| statement_list statement { $1->PushBack(NodePtr($2)); $$=$1; }
+	| statement_list declaration { $1->PushBack(NodePtr($2)); $$=$1; }
+	| statement_list Assignment { $1->PushBack(NodePtr($2)); $$=$1; }
 	;
 
 jump_statement

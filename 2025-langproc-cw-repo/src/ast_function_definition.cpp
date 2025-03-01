@@ -14,6 +14,10 @@ void FunctionDefinition::EmitRISC(std::ostream& stream, Context& context) const
 
     declarator_->EmitRISC(stream, context);
 
+    stream << "addi    sp,sp,-32" <<std::endl;
+    stream << "sw      s0,28(sp)" <<std::endl;
+    stream << "addi    s0,sp,32" <<std::endl;
+
     if (compound_statement_ != nullptr)
     {
         compound_statement_->EmitRISC(stream, context);

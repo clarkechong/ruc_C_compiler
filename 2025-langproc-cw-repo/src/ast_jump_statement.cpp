@@ -8,7 +8,10 @@ void ReturnStatement::EmitRISC(std::ostream& stream, Context& context) const
     {
         expression_->EmitRISC(stream, context);
     }
-    stream << "jr ra" << std::endl;
+    stream <<"mv      a0,a5"<< std::endl;
+    stream <<"lw      s0,28(sp)"<< std::endl;
+    stream <<"addi    sp,sp,32"<< std::endl;
+    stream <<"jr      ra"<< std::endl;
 }
 
 void ReturnStatement::Print(std::ostream& stream) const
