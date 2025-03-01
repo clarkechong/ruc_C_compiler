@@ -1,6 +1,6 @@
 int f()
 {
     int meow;
-    meow = 10;
+    meow = 5;
     return 5;
 }

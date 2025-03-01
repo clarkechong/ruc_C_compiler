@@ -5,7 +5,6 @@ namespace ast {
 void IntConstant::EmitRISC(std::ostream& stream, Context&) const
 {
     stream << "li a5, " << value_ << std::endl;
-    stream << "mv a0,a5 " << std::endl;
 }
 
 void IntConstant::Print(std::ostream& stream) const
