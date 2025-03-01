@@ -116,6 +116,8 @@ statement_list
 	| declaration { $$ = new NodeList(NodePtr($1)); }
 	| Assignment { $$ = new NodeList(NodePtr($1)); }
 	| statement_list statement { $1->PushBack(NodePtr($2)); $$=$1; }
+	| statement_list declaration { $1->PushBack(NodePtr($2)); $$=$1; }
+	| statement_list Assignment { $1->PushBack(NodePtr($2)); $$=$1; }
 	;
 
 jump_statement

@@ -4,8 +4,8 @@ namespace ast {
 
 void InitDecl::EmitRISC(std::ostream& stream, Context& context) const
 {
-    declarator_->EmitRISC(stream,context);
-    stream << "sw    a5,-20(s0)"<<std::endl;
+    (void)context;
+    stream << "nop "<<std::endl;
 }
 
 void InitDecl::Print(std::ostream& stream) const
