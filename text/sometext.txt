@@ -1,28 +1,10 @@
-// helloooooooooo
-
-/*
-    random bogus text to test
-*/
-
-int a = 10 + 5 * 2;
-char c = 'x';
-if (a > 20) { printf("a > 20"); }
-while (a < 30) { a++; }
-int add(int x, int y) { return x + y; }
-int result = add(a, 5);
-int op = 1 << 2;
-// comment
-/* multi-line */
-char* str = "test";
-#define PI 3.14
-int arr[2] = {1, 2};
-struct S { int x; };
-struct S s;
-enum E { RED };
-float cast = (float)a;
-; {}
-int complex = (1 + 2) * 3;
-int hex = 0x1A;
-int longVar = 1000000000;
-// int error = 10 + ;
-int spaced = 10   +   5;
+int f()
+{
+    int x;
+    int y;
+    y=0;
+    for(x=0; x<10; x=x+1){
+        y=y-1;
+    }
+    return y;
+}

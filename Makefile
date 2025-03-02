@@ -10,7 +10,7 @@ CPPFLAGS += -I src/generated
 
 .PHONY: default clean
 
-default:
+all: bin/lexer_main bin/parser_main
 
 build/%.o: src/%.cpp
 	@mkdir -p $(@D)
@@ -28,7 +28,11 @@ src/generated/parser.tab.hpp src/generated/parser.tab.cpp: src/parser.y
 	@mkdir -p $(@D)
 	bison -d src/parser.y -o src/generated/parser.tab.cpp
 
-bin/lexer_main: src/generated/parser.tab.hpp build/lexer_main.o build/lexer.yy.o build/parser.tab.o 
+bin/lexer_main: build/parser.tab.o build/lexer.yy.o build/lexer_main.o
+	@mkdir -p $(@D)
+	g++ ${CPPFLAGS} $^ -o $@
+
+bin/parser_main: build/parser.tab.o build/lexer.yy.o build/parser_main.o
 	@mkdir -p $(@D)
 	g++ ${CPPFLAGS} $^ -o $@
 
