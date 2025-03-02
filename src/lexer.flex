@@ -1,14 +1,8 @@
-%option noyywrap
-
 %{
-  // A lot of this lexer is based off the ANSI C grammar:
-  // https://www.lysator.liu.se/c/ANSI-C-grammar-l.html#MUL-ASSIGN
-  // Avoid error "error: `fileno' was not declared in this scope"
-  extern "C" int fileno(FILE *stream);
-
   #include "parser.tab.hpp"
 
-  [[maybe_unused]] static void yyunput (int c, char * yy_bp );
+  // extern "C" int fileno(FILE *stream);
+  // [[maybe_unused]] static void yyunput (int c, char * yy_bp );
 %}
 
 D	  [0-9]
@@ -127,8 +121,13 @@ L?\"(\\.|[^\\"])*\"	    {/* TODO process string literal */; return(STRING_LITERA
 
 %%
 
+// yywrap() called when EOF of a single file reached. implement if processing multiple files.
+int yywrap() {
+  return 1;
+}
+
 void yyerror (char const *s)
 {
-  fprintf(stderr, "Lexing error: %s\n", s);
+  fprintf(stderr, "yyerror() called with message: %s\n", s);
   exit(1);
 }

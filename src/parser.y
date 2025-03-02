@@ -38,7 +38,7 @@
 %%
 
 primary_expression
-	: IDENTIFIER
+	: IDENTIFIER { std::cout << "GAY FOOCIN WANKER\n";}
 	| INT_CONSTANT
 	| FLOAT_CONSTANT
 	| STRING_LITERAL
