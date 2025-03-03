@@ -127,6 +127,9 @@ jump_statement
 	| RETURN expression ';' {
 		$$ = new ReturnStatement(NodePtr($2));
 	}
+	| RETURN declarator ';' {
+		$$ = new RetVar(NodePtr($2));
+	}
 	;
 
 primary_expression

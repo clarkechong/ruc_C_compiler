@@ -9,7 +9,7 @@ void Assignment::EmitRISC(std::ostream& stream, Context& context) const
     stream << "li    a5,";
     value_->Print(stream);
     stream << " " <<std::endl;
-    stream << "sw   a5,-20(sp)"<<std::endl;
+    stream << "sw   a5,-20(s0)"<<std::endl;
 
 }
 
