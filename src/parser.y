@@ -179,8 +179,9 @@ declaration
 	;
 
 declaration_specifiers
-	: storage_class_specifier
-	| storage_class_specifier declaration_specifiers
+	// : storage_class_specifier
+	// | storage_class_specifier declaration_specifiers
+	: TYPEDEF declaration_specifiers
 	| type_specifier
 	| type_specifier declaration_specifiers
 	// | type_qualifier
@@ -197,20 +198,20 @@ init_declarator
 	| declarator '=' initializer
 	;
 
-storage_class_specifier
-	: TYPEDEF
-	| EXTERN
-	| STATIC
-	| AUTO
-	| REGISTER
-	;
+// storage_class_specifier
+// 	: TYPEDEF
+// 	| EXTERN
+// 	| STATIC
+// 	| AUTO
+// 	| REGISTER
+// 	;
 
 type_specifier
 	: VOID
 	| CHAR
-	| SHORT
+	// | SHORT
 	| INT
-	| LONG
+	// | LONG
 	| FLOAT
 	| DOUBLE
 	| SIGNED
