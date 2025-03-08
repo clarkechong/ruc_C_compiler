@@ -5,8 +5,7 @@
 
 namespace ast {
 
-enum class TypeSpecifier
-{
+enum class TypeSpecifier {
     INT
 };
 

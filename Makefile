@@ -1,14 +1,15 @@
-CPPFLAGS += -W -Wall -g 
-CPPFLAGS += -Wno-unused-function -Wno-unused-parameter
 CPPFLAGS += -std=c++20
+CPPFLAGS += -W -Wall -g 
+CPPFLAGS += -Wno-unused-function -Wno-unused-parameter -Wno-unused-variable
 CPPFLAGS += -I include/
-CPPFLAGS += -I src/generated
+CPPFLAGS += -I src/ -I src/generated
 
 # $< expands to the first listed dependency
 # $@ expands to the build target path
+# @D expands to the (parent) directory part of the target path
 # -c to specify only compilation, not linking, and produces obj .o file
 
-.PHONY: default clean
+.PHONY: all clean
 
 all: bin/lexer_main bin/parser_main
 
@@ -17,6 +18,10 @@ build/%.o: src/%.cpp
 	g++ ${CPPFLAGS} -c $< -o $@
 
 build/%.o: src/generated/%.cpp
+	@mkdir -p $(@D)
+	g++ ${CPPFLAGS} -c $< -o $@
+
+build/%.o: src/mains/%.cpp
 	@mkdir -p $(@D)
 	g++ ${CPPFLAGS} -c $< -o $@
 
