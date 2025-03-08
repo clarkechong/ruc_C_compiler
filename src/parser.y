@@ -1,13 +1,14 @@
 %code requires{
     #include "ast.hpp"
-
+	
 	using namespace ast;
 
     extern Node* g_root;
     extern FILE* yyin;
+
     int yylex(void);
-    void yyerror(const char*);
 	int yylex_destroy(void);
+    void yyerror(const char*);
 }
 
 // Represents the value associated with any kind of AST node.
@@ -187,8 +188,8 @@ declaration_specifiers
 	| storage_class_specifier declaration_specifiers
 	| type_specifier
 	| type_specifier declaration_specifiers
-	| type_qualifier
-	| type_qualifier declaration_specifiers
+	// | type_qualifier
+	// | type_qualifier declaration_specifiers
 	;
 
 init_declarator_list
@@ -242,8 +243,6 @@ struct_declaration
 specifier_qualifier_list
 	: type_specifier specifier_qualifier_list
 	| type_specifier
-	| type_qualifier specifier_qualifier_list
-	| type_qualifier
 	;
 
 struct_declarator_list
@@ -273,10 +272,10 @@ enumerator
 	| IDENTIFIER '=' constant_expression
 	;
 
-type_qualifier
-	: CONST
-	| VOLATILE
-	;
+// type_qualifier
+// 	: CONST
+// 	| VOLATILE
+// 	;
 
 declarator
 	: pointer direct_declarator
@@ -295,15 +294,15 @@ direct_declarator
 
 pointer
 	: '*'
-	| '*' type_qualifier_list
 	| '*' pointer
-	| '*' type_qualifier_list pointer
+	// | '*' type_qualifier_list
+	// | '*' type_qualifier_list pointer
 	;
 
-type_qualifier_list
-	: type_qualifier
-	| type_qualifier_list type_qualifier
-	;
+// type_qualifier_list /* this would have referred to "const volatile <something>" */
+// 	: type_qualifier
+// 	| type_qualifier_list type_qualifier
+// 	;
 
 
 parameter_type_list
