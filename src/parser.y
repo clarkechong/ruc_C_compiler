@@ -26,19 +26,21 @@
 %token AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
 %token SUB_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN
 %token XOR_ASSIGN OR_ASSIGN TYPE_NAME
-
 %token TYPEDEF EXTERN STATIC AUTO REGISTER
 %token CHAR SHORT INT LONG SIGNED UNSIGNED FLOAT DOUBLE CONST VOLATILE VOID
 %token STRUCT UNION ENUM ELLIPSIS
-
 %token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
 
-%start translation_unit
+%start ROOT
 
 %%
 
+ROOT
+	: translation_unit
+	;
+
 primary_expression
-	: IDENTIFIER { std::cout << "GAY FOOCIN WANKER\n";}
+	: IDENTIFIER
 	| INT_CONSTANT
 	| FLOAT_CONSTANT
 	| STRING_LITERAL
@@ -436,15 +438,17 @@ function_definition
 
 %%
 
-Node* g_root;
+Node* g_root; // outside of parseAST so that yyparse() can access g_root
 
-NodePtr ParseAST(std::string file_name)
+NodePtr parseAST(std::string file_name)
 {
   yyin = fopen(file_name.c_str(), "r");
+
   if(yyin == NULL){
     std::cerr << "Couldn't open input file: " << file_name << std::endl;
     exit(1);
   }
+
   g_root = nullptr;
   yyparse();
   fclose(yyin);

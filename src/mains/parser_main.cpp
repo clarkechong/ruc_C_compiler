@@ -9,11 +9,11 @@
 
 #include <stdio.h>
 #include <iostream>
-#include "parser.tab.hpp"
+#include "ast.hpp"
 
 int main(int argc, char** argv) {
 
-    ParseAST(argv[1]);
+    parseAST(argv[1]);
 
     return 0;
     
