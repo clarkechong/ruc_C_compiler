@@ -283,7 +283,7 @@ direct_declarator
 	| '(' declarator ')'
 	| direct_declarator '[' constant_expression ']'
 	| direct_declarator '[' ']'
-	| direct_declarator '(' parameter_type_list ')'
+	| direct_declarator '(' parameter_list ')'
 	| direct_declarator '(' identifier_list ')'
 	| direct_declarator '(' ')'
 	;
@@ -301,10 +301,10 @@ pointer
 // 	;
 
 
-parameter_type_list
-	: parameter_list
-	| parameter_list ',' ELLIPSIS
-	;
+// parameter_type_list
+// 	: parameter_list
+// 	| parameter_list ',' ELLIPSIS
+// 	;
 
 parameter_list
 	: parameter_declaration
@@ -340,9 +340,9 @@ direct_abstract_declarator
 	| direct_abstract_declarator '[' ']'
 	| direct_abstract_declarator '[' constant_expression ']'
 	| '(' ')'
-	| '(' parameter_type_list ')'
+	| '(' parameter_list ')'
 	| direct_abstract_declarator '(' ')'
-	| direct_abstract_declarator '(' parameter_type_list ')'
+	| direct_abstract_declarator '(' parameter_list ')'
 	;
 
 initializer
