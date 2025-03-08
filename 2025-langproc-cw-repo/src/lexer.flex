@@ -127,8 +127,8 @@ L?\"(\\.|[^\\"])*\"	    {/* TODO process string literal */; return(STRING_LITERA
 
 %%
 
-void yyerror (char const *s)
+/* void yyerror (char const *s)
 {
   fprintf(stderr, "Lexing error: %s\n", s);
   exit(1);
-}
+} */

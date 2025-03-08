@@ -9,6 +9,8 @@
 
 	using namespace ast;
 
+	extern int yylineno;
+	extern char* yytext;
     extern Node* g_root;
     extern FILE* yyin;
     int yylex(void);
@@ -38,6 +40,7 @@
 %type <node> unary_expression cast_expression multiplicative_expression additive_expression shift_expression relational_expression
 %type <node> equality_expression and_expression exclusive_or_expression inclusive_or_expression logical_and_expression logical_or_expression
 %type <node> conditional_expression assignment_expression expression declarator direct_declarator statement compound_statement jump_statement declaration Assignment
+%type <node> constant_initialiser
 
 %type <node_list> statement_list
 
@@ -87,6 +90,11 @@ declaration
 	}
 	;
 
+constant_initialiser
+	:declaration_specifiers declarator '='  expression ';'{
+		$$ = new InitDecl($1,NodePtr($2),NodePtr($4));
+	}
+
 Assignment
 	: declarator '=' expression ';' {
 		$$ = new Assignment(NodePtr($1),NodePtr($3));
@@ -114,10 +122,12 @@ compound_statement
 statement_list
 	: statement { $$ = new NodeList(NodePtr($1)); }
 	| declaration { $$ = new NodeList(NodePtr($1)); }
+	| constant_initialiser { $$ = new NodeList(NodePtr($1)); }
 	| Assignment { $$ = new NodeList(NodePtr($1)); }
 	| statement_list statement { $1->PushBack(NodePtr($2)); $$=$1; }
 	| statement_list declaration { $1->PushBack(NodePtr($2)); $$=$1; }
 	| statement_list Assignment { $1->PushBack(NodePtr($2)); $$=$1; }
+	| statement_list constant_initialiser { $1->PushBack(NodePtr($2)); $$=$1; }
 	;
 
 jump_statement
@@ -205,6 +215,13 @@ expression
 %%
 
 Node* g_root;
+
+void yyerror (const char *s)
+{
+  std::cerr << "Error: " << s << " at line " << yylineno;
+  std::cerr << " near '" << yytext << "'" << std::endl;
+  std::exit(1);
+}
 
 NodePtr ParseAST(std::string file_name)
 {
