@@ -85,8 +85,8 @@ declarator
 	;
 
 declaration
-	:declaration_specifiers declarator ';' {
-		$$ = new InitDecl($1,NodePtr($2),NULL);
+	:declaration_specifiers IDENTIFIER ';' {
+		$$ = new Variable($1,*($2));
 	}
 	;
 

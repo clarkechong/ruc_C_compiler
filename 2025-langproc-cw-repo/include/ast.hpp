@@ -3,6 +3,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <sstream>
+
 
 #include "ast_direct_declarator.hpp"
 #include "ast_function_definition.hpp"

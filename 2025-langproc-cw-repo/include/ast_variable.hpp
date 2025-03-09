@@ -11,15 +11,17 @@ namespace ast {
 class Variable : public Node
 {
 private:
-    NodePtr declarator_;
-    TypeSpecifier declaration_specifiers_;
+    TypeSpecifier type_;
+    std::string identifier_;
 
 public:
-    Variable(NodePtr declarator) : declarator_(std::move(declarator)){};
+    Variable(TypeSpecifier type, std::string identifier) : type_(type), identifier_(identifier){};
 
     void EmitRISC(std::ostream& stream, Context& context) const override;
 
     void Print(std::ostream& stream) const override;
+
+    std::string getid() const;
 
 
 };

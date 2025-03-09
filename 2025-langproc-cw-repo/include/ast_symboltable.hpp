@@ -11,17 +11,13 @@
 
 namespace ast{
 
-struct Variableinfo{
-    TypeSpecifier type;
-    int offset;
-};
+
 
 class SymbolTable {
 private:
-    std::unordered_map<std::string, Variableinfo> table_;
-
+    std::unordered_map<std::string, int> table_;
 public:
-    void AllocateVariable(const std::string& name, TypeSpecifier type) ;
+    void AllocateVariable(const std::string& name, int offset_) ;
     int GetVariableOffset(const std::string& name) const ;
     TypeSpecifier GetType(const std::string& name) const;
 };

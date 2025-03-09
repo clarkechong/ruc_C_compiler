@@ -14,6 +14,10 @@ public:
     virtual ~Node() {}
     virtual void EmitRISC(std::ostream& stream, Context& context) const = 0;
     virtual void Print(std::ostream& stream) const = 0;
+    virtual std::string getid() const {
+        return "Message placed to avoid pure virtual" ;
+    }
+
 };
 
 // If you don't feel comfortable using std::unique_ptr, you can switch NodePtr to be defined

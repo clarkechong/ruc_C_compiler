@@ -1,5 +1,7 @@
 #include "ast_initdeclaration.hpp"
-#include "ast_constant.hpp"
+#include "ast_context.hpp"
+#include <sstream>
+
 
 namespace ast {
 
@@ -8,7 +10,7 @@ void InitDecl::EmitRISC(std::ostream& stream, Context& context) const
 
     if( value_ != NULL){
         value_->EmitRISC(stream,context);
-        stream << "sw   a5,-20(s0)" << std::endl;
+
     }
 
 }

@@ -3,11 +3,12 @@
 
 namespace ast{
 
-Context::Context() : stackPointer_(0) {}
+Context::Context(){}
 
-void Context::AllocateVariable(const std::string& name, TypeSpecifier type)  {
-    stackPointer_ -= 4;
-    symbolTable_.AllocateVariable(name,type);
+
+void Context::AllocateVariable(const std::string& name)  {
+    offset_ -= 4;
+    symbolTable_.AllocateVariable(name,offset_);
 }
 
 

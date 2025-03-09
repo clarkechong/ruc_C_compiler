@@ -3,23 +3,18 @@
 
 namespace ast{
 
-void SymbolTable::AllocateVariable(const std::string& name, TypeSpecifier type) {
-    int offset = table_.size() * -4;
-    table_[name] = {type, offset};
+void SymbolTable::AllocateVariable(const std::string& name, int offset) {
+    table_[name] = offset;
 }
 
 int SymbolTable::GetVariableOffset(const std::string& name) const {
-    if (table_.find(name) != table_.end()) {
-        return table_.at(name).offset;
+    auto it = table_.find(name);
+    if (it != table_.end()) {
+        return it->second;
     }
+    else{
     throw std::runtime_error("Variable not found: " + name);
-}
-
-TypeSpecifier SymbolTable::GetType(const std::string& name) const{
-    if (table_.find(name) != table_.end()) {
-        return table_.at(name).type;
     }
-    throw std::runtime_error("Variable not found: " + name);
 }
 
 }

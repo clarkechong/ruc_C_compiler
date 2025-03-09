@@ -11,12 +11,12 @@ namespace ast {
 class Context {
     private:
         SymbolTable symbolTable_;
-        int stackPointer_ = 0;
+        int offset_ = -20;
 
     public:
         Context();
 
-        void AllocateVariable(const std::string& name, TypeSpecifier type) ;
+        void AllocateVariable(const std::string& name) ;
 
         int GetVariableOffset(const std::string& name) const ;
 };
