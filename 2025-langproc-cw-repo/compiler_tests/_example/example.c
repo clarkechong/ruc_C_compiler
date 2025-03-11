@@ -1,6 +1,9 @@
 int f()
 {
     int meow;
-    meow = 5;
-    return 5;
+    int bark;
+    meow = 7;
+    bark = 5;
+    meow = 7 % 5;
+    return meow;
 }

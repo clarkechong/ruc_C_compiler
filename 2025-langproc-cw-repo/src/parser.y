@@ -146,6 +146,7 @@ primary_expression
 	: INT_CONSTANT {
 		$$ = new IntConstant($1);
 	}
+	| direct_declarator
 	;
 
 postfix_expression
@@ -162,10 +163,25 @@ cast_expression
 
 multiplicative_expression
 	: cast_expression
+	| expression '*' expression{
+		$$ = new Multiply(NodePtr($1),NodePtr($3));
+	}
+	| expression '/' expression{
+		$$ = new Divide(NodePtr($1),NodePtr($3));
+	}
+	| expression '%' expression{
+		$$ = new Modulus(NodePtr($1),NodePtr($3));
+	}
 	;
 
 additive_expression
 	: multiplicative_expression
+	| expression '+' expression{
+		$$ = new Addition(NodePtr($1),NodePtr($3));
+	}
+	| expression '-' expression{
+		$$ = new Subtraction(NodePtr($1),NodePtr($3));
+	}
 	;
 
 shift_expression

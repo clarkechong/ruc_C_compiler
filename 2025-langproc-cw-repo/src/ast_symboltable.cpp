@@ -13,7 +13,7 @@ int SymbolTable::GetVariableOffset(const std::string& name) const {
         return it->second;
     }
     else{
-    throw std::runtime_error("Variable not found: " + name);
+        return 512;
     }
 }
 

@@ -10,9 +10,10 @@ void FunctionDefinition::EmitRISC(std::ostream& stream, Context& context) const
     stream << ".text" << std::endl;
     stream << ".globl ";
     declarator_->Print(stream);
-    stream << std::endl;
-
-    declarator_->EmitRISC(stream, context);
+    stream << " " << std::endl;
+    declarator_->Print(stream);
+    stream << ":" << std::endl;
+    //declarator_->EmitRISC(stream, context);
 
     stream << "addi    sp,sp,-32" <<std::endl;
     stream << "sw      s0,28(sp)" <<std::endl;

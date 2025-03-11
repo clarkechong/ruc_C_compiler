@@ -6,7 +6,7 @@ namespace ast {
 void Variable::EmitRISC(std::ostream& stream, Context& context) const
 {
     context.AllocateVariable(identifier_);
-    stream << "nop" << std::endl;
+    stream << " ";
 }
 
 void Variable::Print(std::ostream& stream) const

@@ -6,8 +6,8 @@ namespace ast {
 
 void Assignment::EmitRISC(std::ostream& stream, Context& context) const
 {
-    //identifier_->EmitRISC(stream,context);
     value_->EmitRISC(stream,context);
+    //identifier_->EmitRISC(stream,context);
     std::ostringstream interm;
     identifier_->Print(interm);
     std::string name = interm.str();

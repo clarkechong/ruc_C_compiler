@@ -19,5 +19,11 @@
 #include "ast_initdeclaration.hpp"
 #include "ast_assignment.hpp"
 #include "ast_retvar.hpp"
+#include "ast_addition.hpp"
+#include "ast_subtraction.hpp"
+#include "ast_multiply.hpp"
+#include "ast_divide.hpp"
+#include "ast_modulus.hpp"
+
 
 ast::NodePtr ParseAST(std::string file_name);

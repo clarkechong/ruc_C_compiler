@@ -7,8 +7,8 @@ Context::Context(){}
 
 
 void Context::AllocateVariable(const std::string& name)  {
-    offset_ -= 4;
     symbolTable_.AllocateVariable(name,offset_);
+    offset_ -= 4;
 }
 
 
