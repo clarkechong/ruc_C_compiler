@@ -18,12 +18,21 @@
 #include "ast_symboltable.hpp"
 #include "ast_initdeclaration.hpp"
 #include "ast_assignment.hpp"
-#include "ast_retvar.hpp"
-#include "ast_addition.hpp"
-#include "ast_subtraction.hpp"
-#include "ast_multiply.hpp"
-#include "ast_divide.hpp"
-#include "ast_modulus.hpp"
+#include "Operators/Arithmetic/ast_addition.hpp"
+#include "Operators/Arithmetic/ast_subtraction.hpp"
+#include "Operators/Arithmetic/ast_multiply.hpp"
+#include "Operators/Arithmetic/ast_divide.hpp"
+#include "Operators/Arithmetic/ast_modulus.hpp"
+#include "Operators/Arithmetic/ast_unary.hpp"
+#include "Operators/Arithmetic/ast_incr.hpp"
+#include "Operators/Arithmetic/ast_decr.hpp"
+#include "Operators/Comparison/ast_equality.hpp"
+#include "Operators/Comparison/ast_neq.hpp"
+#include "Operators/Comparison/ast_graa.hpp"
+#include "Operators/Comparison/ast_less.hpp"
+#include "Operators/Comparison/ast_geq.hpp"
+#include "Operators/Comparison/ast_leq.hpp"
+
 
 
 ast::NodePtr ParseAST(std::string file_name);

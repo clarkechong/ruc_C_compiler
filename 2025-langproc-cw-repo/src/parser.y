@@ -137,9 +137,6 @@ jump_statement
 	| RETURN expression ';' {
 		$$ = new ReturnStatement(NodePtr($2));
 	}
-	| RETURN declarator ';' {
-		$$ = new RetVar(NodePtr($2));
-	}
 	;
 
 primary_expression
@@ -151,10 +148,16 @@ primary_expression
 
 postfix_expression
 	: primary_expression
+	| expression INC_OP {
+		$$ = new Incr(NodePtr($1));
+	}
 	;
 
 unary_expression
 	: postfix_expression
+	| '-' expression {
+		$$ = new Unary(NodePtr($2));
+	}
 	;
 
 cast_expression
@@ -190,10 +193,28 @@ shift_expression
 
 relational_expression
 	: shift_expression
+	| expression '>' expression {
+		$$ = new Greater(NodePtr($1),NodePtr($3));
+	}
+	| expression GE_OP expression {
+		$$ = new Geq(NodePtr($1),NodePtr($3));
+	}
+	| expression '<' expression {
+		$$ = new Less(NodePtr($1),NodePtr($3));
+	}
+	| expression LE_OP expression {
+		$$ = new Geq(NodePtr($1),NodePtr($3));
+	}
 	;
 
 equality_expression
 	: relational_expression
+	| expression EQ_OP expression{
+		$$ = new Equality(NodePtr($1),NodePtr($3));
+	}
+	| expression NE_OP expression{
+		$$ = new Neq(NodePtr($1),NodePtr($3));
+	}
 	;
 
 and_expression

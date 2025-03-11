@@ -1,5 +1,5 @@
 #include "ast_context.hpp"
-#include "ast_divide.hpp"
+#include "Operators/Arithmetic/ast_divide.hpp"
 #include <sstream>
 
 namespace ast {

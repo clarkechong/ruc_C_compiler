@@ -4,16 +4,18 @@
 
 namespace ast {
 
-class RetVar : public Node
+class Neq  : public Node
 {
 private:
-    NodePtr declarator_;
+    NodePtr left_;
+    NodePtr right_;
 
 public:
-    RetVar(NodePtr declarator) : declarator_(std::move(declarator)) {}
+    Neq(NodePtr left, NodePtr right) : left_(std::move(left)),right_(std::move(right)){};
 
     void EmitRISC(std::ostream& stream, Context& context) const override;
     void Print(std::ostream& stream) const override;
+
 };
 
 } // namespace ast
