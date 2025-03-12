@@ -1,10 +1,12 @@
 int f()
 {
     int meow;
-    int bark;
-    int dogcat;
-    meow = 4;
-    bark = 4;
-    dogcat = meow <= bark;
-    return dogcat;
+    meow = 5;
+    if(meow == 10){
+        meow = 15;
+    }
+    if(meow != 10){
+        meow = 20;
+    }
+    return meow;
 }

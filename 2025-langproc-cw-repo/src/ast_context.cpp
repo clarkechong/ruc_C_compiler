@@ -16,4 +16,9 @@ int Context::GetVariableOffset(const std::string& name) const {
     return symbolTable_.GetVariableOffset(name);
 }
 
+int Context::Branchoffset() {
+    branch_enum++;
+    return branch_enum;
+}
+
 }

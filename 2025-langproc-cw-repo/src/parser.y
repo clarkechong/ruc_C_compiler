@@ -41,6 +41,7 @@
 %type <node> equality_expression and_expression exclusive_or_expression inclusive_or_expression logical_and_expression logical_or_expression
 %type <node> conditional_expression assignment_expression expression declarator direct_declarator statement compound_statement jump_statement declaration Assignment
 %type <node> constant_initialiser
+%type <node> selection_statement
 
 %type <node_list> statement_list
 
@@ -111,14 +112,6 @@ direct_declarator
 	}
 	;
 
-statement
-	: jump_statement { $$ = $1; }
-	;
-
-compound_statement
-	: '{' statement_list '}' { $$ = $2; }
-	;
-
 statement_list
 	: statement { $$ = new NodeList(NodePtr($1)); }
 	| declaration { $$ = new NodeList(NodePtr($1)); }
@@ -128,6 +121,22 @@ statement_list
 	| statement_list declaration { $1->PushBack(NodePtr($2)); $$=$1; }
 	| statement_list Assignment { $1->PushBack(NodePtr($2)); $$=$1; }
 	| statement_list constant_initialiser { $1->PushBack(NodePtr($2)); $$=$1; }
+	;
+
+statement
+	: jump_statement { $$ = $1; }
+	| selection_statement { $$ = $1;}
+	| compound_statement { $$ = $1;}
+	;
+
+compound_statement
+	: '{' statement_list '}' { $$ = $2; }
+	;
+
+selection_statement
+	: IF '(' expression ')' statement{
+		$$ = new Ifstate(NodePtr($3),NodePtr($5));
+	}
 	;
 
 jump_statement
