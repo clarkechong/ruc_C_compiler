@@ -41,7 +41,7 @@
 %type <node> equality_expression and_expression exclusive_or_expression inclusive_or_expression logical_and_expression logical_or_expression
 %type <node> conditional_expression assignment_expression expression declarator direct_declarator statement compound_statement jump_statement declaration Assignment
 %type <node> constant_initialiser
-%type <node> selection_statement
+%type <node> selection_statement iteration_statement
 
 %type <node_list> statement_list
 
@@ -127,6 +127,7 @@ statement
 	: jump_statement { $$ = $1; }
 	| selection_statement { $$ = $1;}
 	| compound_statement { $$ = $1;}
+	| iteration_statement {$$ = $1;}
 	;
 
 compound_statement
@@ -135,9 +136,17 @@ compound_statement
 
 selection_statement
 	: IF '(' expression ')' statement{
-		$$ = new Ifstate(NodePtr($3),NodePtr($5));
+		$$ = new EILF(NodePtr($3),NodePtr($5),nullptr);
+	}
+	| IF '(' expression ')' statement ELSE statement{
+		$$ = new EILF(NodePtr($3),NodePtr($5),NodePtr($7));
 	}
 	;
+
+iteration_statement
+	: WHILE '(' expression ')' statement{
+		$$ = new Whilefunc(NodePtr($3),NodePtr($5));
+	}
 
 jump_statement
 	: RETURN ';' {
@@ -157,7 +166,7 @@ primary_expression
 
 postfix_expression
 	: primary_expression
-	| expression INC_OP {
+	| postfix_expression INC_OP {
 		$$ = new Incr(NodePtr($1));
 	}
 	;

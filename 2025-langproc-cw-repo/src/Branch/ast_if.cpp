@@ -2,25 +2,35 @@
 
 namespace ast {
 
-void Ifstate::EmitRISC(std::ostream& stream, Context& context) const
+void EILF::EmitRISC(std::ostream& stream, Context& context) const
 {
-    expression_->EmitRISC(stream,context);
-    int branchnum = context.Branchoffset();
-    stream << "beqz     a5,.L" << branchnum <<std::endl;
-    statement_->EmitRISC(stream, context);
-    stream << ".L" << branchnum <<":" <<std::endl;
-
-
+    condexpression_->EmitRISC(stream,context);
+    int branchnumi = context.Branchoffset();
+    stream << "beqz     a5,.L" << branchnumi <<std::endl;
+    ifstatement_->EmitRISC(stream, context);
+    int branchnume = context.Branchoffset();
+    if(elsestatement_ != nullptr){
+        stream << "j        .L" <<branchnume <<std::endl;
+    }
+    stream << ".L" << branchnumi <<":" <<std::endl;
+    if(elsestatement_ != nullptr){
+        elsestatement_->EmitRISC(stream,context);
+        stream << ".L" << branchnume << ":" <<std::endl;
+    }
 }
 
-void Ifstate::Print(std::ostream& stream) const
+void EILF::Print(std::ostream& stream) const
 {
     stream << "if (";
-    expression_->Print(stream);
+    condexpression_->Print(stream);
     stream << "){" <<std::endl;
-    statement_->Print(stream);
-    stream << std::endl;
+    ifstatement_->Print(stream);
     stream << "}" <<std::endl;
+    if(elsestatement_ != nullptr){
+        stream << "else{" <<std::endl;
+        elsestatement_->Print(stream);
+        stream << "}" << std::endl;
+    }
 
 }
 

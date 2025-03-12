@@ -4,14 +4,15 @@
 
 namespace ast {
 
-class Ifstate : public Node
+class EILF : public Node
 {
 private:
-    NodePtr expression_;
-    NodePtr statement_;
+    NodePtr condexpression_;
+    NodePtr ifstatement_;
+    NodePtr elsestatement_;
 
 public:
-    Ifstate(NodePtr expression, NodePtr statement) : expression_(std::move(expression)), statement_(std::move(statement)){};
+    EILF(NodePtr condexpression, NodePtr ifstatement, NodePtr elsestatement) : condexpression_(std::move(condexpression)), ifstatement_(std::move(ifstatement)),elsestatement_(std::move(elsestatement)){};
 
     void EmitRISC(std::ostream& stream, Context& context) const override;
     void Print(std::ostream& stream) const override;
