@@ -18,6 +18,8 @@
 #include "ast_symboltable.hpp"
 #include "ast_initdeclaration.hpp"
 #include "ast_assignment.hpp"
+#include "ast_externdef.hpp"
+#include "ast_paramdecl.hpp"
 #include "Operators/Arithmetic/ast_addition.hpp"
 #include "Operators/Arithmetic/ast_subtraction.hpp"
 #include "Operators/Arithmetic/ast_multiply.hpp"

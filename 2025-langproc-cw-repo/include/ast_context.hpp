@@ -13,6 +13,7 @@ class Context {
         SymbolTable symbolTable_;
         int offset_ = -20;
         int branch_enum = 2;
+        int reggie = -1;
 
     public:
         Context();
@@ -22,6 +23,8 @@ class Context {
         int GetVariableOffset(const std::string& name) const ;
 
         int Branchoffset() ;
+
+        int Paramreg() ;
 };
 
 } // namespace ast

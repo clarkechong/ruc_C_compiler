@@ -21,4 +21,9 @@ int Context::Branchoffset() {
     return branch_enum;
 }
 
+int Context::Paramreg(){
+    reggie++;
+    return reggie;
+}
+
 }

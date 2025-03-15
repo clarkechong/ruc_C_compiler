@@ -1,18 +1,7 @@
-#include <stdio.h>
 
-int f();
-
-void test(double a)
-{
-    printf("Test function produced value: %f\n", (float)a + 3.2f);
-}
+int f(int x, int y);
 
 int main()
 {
-    printf("Hello from RISC-V\n");
-
-    test(5.5);
-    printf("Example function returned: %d\n", f());
-
-    return !(f() == 10);
+    return !(f(10,20)==30);
 }

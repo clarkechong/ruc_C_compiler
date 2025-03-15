@@ -42,8 +42,9 @@
 %type <node> conditional_expression assignment_expression expression declarator direct_declarator statement compound_statement jump_statement declaration Assignment
 %type <node> constant_initialiser
 %type <node> selection_statement iteration_statement
+%type <node> parameter_declaration
 
-%type <node_list> statement_list
+%type <node_list> statement_list declaration_list parameter_list
 
 %type <number_int> INT_CONSTANT STRING_LITERAL
 %type <number_float> FLOAT_CONSTANT
@@ -63,12 +64,18 @@ translation_unit
 
 external_declaration
 	: function_definition { $$ = $1; }
+	| declaration_specifiers declarator ';' {
+		$$ = new Externdef($1,NodePtr($2));
+	}
 	;
 
 function_definition
 	: declaration_specifiers declarator compound_statement {
-		$$ = new FunctionDefinition($1, NodePtr($2), NodePtr($3));
+		$$ = new FunctionDefinition($1, NodePtr($2), nullptr , NodePtr($3));
 	}
+    | declaration_specifiers declarator declaration_list compound_statement {
+        $$ = new FunctionDefinition($1,NodePtr($2),NodePtr($3), NodePtr($4));
+    }
 	;
 
 declaration_specifiers
@@ -91,6 +98,13 @@ declaration
 	}
 	;
 
+declaration_list
+	: declaration{
+		$$ = new NodeList(NodePtr($1));
+	}
+	| declaration_list declaration { $1->PushBack(NodePtr($2)); $$=$1; }
+	;
+
 constant_initialiser
 	:declaration_specifiers declarator '='  expression ';'{
 		$$ = new InitDecl($1,NodePtr($2),NodePtr($4));
@@ -108,8 +122,25 @@ direct_declarator
 		delete $1;
 	}
 	| direct_declarator '(' ')' {
-		$$ = new DirectDeclarator(NodePtr($1));
+		$$ = new DirectDeclarator(NodePtr($1),nullptr);
 	}
+	| direct_declarator '(' parameter_list ')'{
+        $$ = new DirectDeclarator(NodePtr($1),NodePtr($3));
+    }
+	;
+
+parameter_list
+	: parameter_declaration {$$ = new NodeList(NodePtr($1)); }
+	| parameter_list ',' parameter_declaration{
+        $1->PushBack(NodePtr($3)); $$=$1;
+    }
+	;
+
+parameter_declaration
+	: declaration_specifiers declarator{
+        $$ = new ParamDecl($1,NodePtr($2));
+    }
+	| declaration_specifiers
 	;
 
 statement_list
