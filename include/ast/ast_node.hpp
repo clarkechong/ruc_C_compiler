@@ -8,14 +8,15 @@
 
 namespace ast {
 
-class Node {
+class Node 
+{
     public:
         virtual ~Node();
-    
-        virtual void emitRISCV(std::ostream& stream, Context& context) const = 0;
-        virtual void print(std::ostream& stream) const = 0;
+
+        virtual void EmitRISCV(std::ostream& stream, Context& context) const = 0;
+        virtual void Print(std::ostream& stream) const = 0;
 };
 
-using NodePtr = std::unique_ptr<const Node>;
+using NodePtr = std::unique_ptr<Node>;
 
 } // namespace ast

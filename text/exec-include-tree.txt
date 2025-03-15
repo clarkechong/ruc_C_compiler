@@ -1,0 +1,45 @@
+include/
+├── ast
+│   ├── Arrays
+│   │   └── ast_arrays.hpp
+│   ├── Blocks
+│   │   ├── ast_block.hpp
+│   │   ├── ast_doloop.hpp
+│   │   ├── ast_forloop.hpp
+│   │   ├── ast_ifelse.hpp
+│   │   ├── ast_switch_case.hpp
+│   │   └── ast_whileloop.hpp
+│   ├── Function
+│   │   ├── ast_function.hpp
+│   │   └── ast_sizeof.hpp
+│   ├── Keyword
+│   │   ├── ast_break.hpp
+│   │   ├── ast_continue.hpp
+│   │   ├── ast_enum.hpp
+│   │   ├── ast_return.hpp
+│   │   └── ast_struct.hpp
+│   ├── Operators
+│   │   ├── ast_arithmetic.hpp
+│   │   ├── ast_assign.hpp
+│   │   ├── ast_bitwise.hpp
+│   │   ├── ast_logical.hpp
+│   │   ├── ast_operator.hpp
+│   │   ├── ast_relational.hpp
+│   │   ├── ast_shift.hpp
+│   │   └── ast_unary.hpp
+│   ├── Pointers
+│   │   └── ast_pointers.hpp
+│   ├── Types
+│   │   ├── ast_strings_chars.hpp
+│   │   └── ast_types.hpp
+│   ├── ast_declaration.hpp
+│   ├── ast_helper.hpp
+│   ├── ast_listnode.hpp
+│   ├── ast_node.hpp
+│   ├── ast_output.hpp
+│   ├── ast_primitives.hpp
+│   └── ast_throwaway.hpp
+├── ast.hpp
+└── cli.h
+
+8 directories, 34 files
