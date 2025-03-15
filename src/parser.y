@@ -12,14 +12,14 @@
 }
 
 // Represents the value associated with any kind of AST node.
-%union{
-  Node*        	node;
-  NodeList*    	node_list;
-  int          	number_int;
-  double       	number_float;
-  std::string* 	string;
-  TypeSpecifier	type_specifier;
-  yytokentype  	token;
+%union {
+	Node*       		node;
+	NodeList*   		node_list;
+	int          		number_int;
+	double       		number_float;
+	std::string* 		string;
+	TypeSpecifier		type_specifier;
+	yytokentype  		token;
 }
 
 %token IDENTIFIER INT_CONSTANT FLOAT_CONSTANT STRING_LITERAL SIZEOF
@@ -32,12 +32,42 @@
 %token STRUCT UNION ENUM ELLIPSIS
 %token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
 
+// %type <node> primary_expression postfix_expression unary_expression
+// %type <node> multiplicative_expression additive_expression shift_expression
+// %type <node> relational_expression equality_expression and_expression
+// %type <node> exclusive_or_expression inclusive_or_expression logical_and_expression
+// %type <node> logical_or_expression conditional_expression assignment_expression
+// %type <node> expression constant_expression
+
+// %type <node> declaration init_declarator
+// %type <node> declaration_specifiers type_specifier
+// %type <node> struct_specifier struct_declaration
+// %type <node> struct_declarator declarator
+// %type <node> enum_specifier enumerator direct_declarator pointer
+
+// %type <node> parameter_declaration type_name abstract_declarator direct_abstract_declarator
+// %type <node> initializer statement labeled_statement compound_statement
+// %type <node> expression_statement selection_statement iteration_statement
+// %type <node> jump_statement external_declaration function_definition
+
+// %type <node_list> translation_unit struct_declaration_list argument_expression_list
+// %type <node_list> specifier_qualifier_list struct_declarator_list
+// %type <node_list> enumerator_list parameter_list
+// %type <node_list> identifier_list initializer_list declaration_list statement_list
+
+// %type <string> IDENTIFIER STRING_LITERAL
+// %type <number_int> INT_CONSTANT
+// %type <number_float> FLOAT_CONSTANT
+
+// %type <node_list> translation_unit 
+// %type <node> external_declaration function_definition declaration
+
 %start ROOT
 
 %%
 
 ROOT
-	: translation_unit
+	: translation_unit //{ /*g_root = $1;*/ }
 	;
 
 primary_expression
@@ -280,11 +310,11 @@ declarator
 
 direct_declarator
 	: IDENTIFIER
-	| '(' declarator ')'
-	| direct_declarator '[' constant_expression ']'
-	| direct_declarator '[' ']'
+	| '(' declarator ')' //{ /* $$ = $2 */ }
+	| direct_declarator '[' constant_expression ']' // array declarator
+	| direct_declarator '[' ']' // array declarator
 	| direct_declarator '(' parameter_list ')'
-	| direct_declarator '(' identifier_list ')'
+	// | direct_declarator '(' identifier_list ')' // OLD K&R STYLE
 	| direct_declarator '(' ')'
 	;
 
@@ -317,10 +347,11 @@ parameter_declaration
 	| declaration_specifiers
 	;
 
-identifier_list
-	: IDENTIFIER
-	| identifier_list ',' IDENTIFIER
-	;
+// NO LONGER REQURIED AS ONLY USED WITHIN K&R STYLE (DIRECT DECLARATOR) FUNCTION DECLARATION
+// identifier_list
+// 	: IDENTIFIER
+// 	| identifier_list ',' IDENTIFIER
+// 	;
 
 type_name
 	: specifier_qualifier_list
@@ -371,11 +402,11 @@ labeled_statement
 	| DEFAULT ':' statement
 	;
 
-compound_statement
-	: '{' '}'
-	| '{' statement_list '}'
-	| '{' declaration_list '}'
-	| '{' declaration_list statement_list '}'
+compound_statement // compound statement = block = scope
+	: '{' '}' //{/* new scope null */}
+	| '{' statement_list '}' //{ /* new scope initiate with STATEMENTS */ }
+	| '{' declaration_list '}' //{ /* new scope initiate with DECLARATIONS */ }
+	| '{' declaration_list statement_list '}' //{ /* new scope initiate with STATEMENTS + DECLARATIONS $1 and $2 */ }
 	;
 
 declaration_list
@@ -407,35 +438,35 @@ iteration_statement
 	;
 
 jump_statement
-	: GOTO IDENTIFIER ';'
-	| CONTINUE ';'
+	// : GOTO IDENTIFIER ';'
+	: CONTINUE ';'
 	| BREAK ';'
 	| RETURN ';'
 	| RETURN expression ';'
 	;
 
 translation_unit
-	: external_declaration
-	| translation_unit external_declaration
+	: external_declaration //{ /* $$ = new NodeList($1); initiate new nodelist (translation unit) with $1 as the first node */ }
+	| translation_unit external_declaration //{ /* $1->push_back($2); $$ = $1; push to existing translation_unit list (i.e. $1) and make sure to point to existing $1 unit*/ }
 	;
 
 external_declaration
-	: function_definition
-	| declaration
+	: function_definition //{ /*$$ = $1;*/ }
+	| declaration //{ /*$$ = $1;*/ }
 	;
 
 function_definition
-	: declaration_specifiers declarator declaration_list compound_statement
-	| declaration_specifiers declarator compound_statement
-	| declarator declaration_list compound_statement
-	| declarator compound_statement
+	: declaration_specifiers declarator compound_statement 
+	| declarator compound_statement // valid but ignore for now
+	// | declaration_specifiers declarator declaration_list compound_statement 	// OLD K&R STYLE
+	// | declarator declaration_list compound_statement 						// OLD K&R STYLE
 	;
 
 %%
 
 Node* g_root; // outside of parseAST so that yyparse() can access g_root
 
-NodePtr parseAST(std::string file_name)
+NodePtr ParseAST(std::string file_name)
 {
   yyin = fopen(file_name.c_str(), "r");
 

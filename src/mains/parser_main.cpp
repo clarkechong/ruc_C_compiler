@@ -13,7 +13,7 @@
 
 int main(int argc, char** argv) {
 
-    parseAST(argv[1]);
+    ParseAST(argv[1]);
 
     return 0;
     

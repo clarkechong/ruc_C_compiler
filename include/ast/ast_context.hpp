@@ -2,7 +2,8 @@
 
 namespace ast {
 
-class Context {
+class Context 
+{
 
 };
 
