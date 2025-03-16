@@ -67,7 +67,7 @@
 %%
 
 ROOT
-	: translation_unit 		{ }
+	: translation_unit 		{ g_root = new ArrayDeclarator(); }
 	;
 
 primary_expression

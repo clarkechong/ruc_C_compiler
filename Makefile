@@ -19,7 +19,7 @@ $(foreach src, $(CPPFILES), $(eval build/$(notdir $(src:.cpp=.o)): $(src)))
 
 .PHONY: all clean
 
-all: bin/lexer_main bin/parser_main
+all: bin/lexer_main bin/parser_main bin/c_compiler
 
 build/%.o: src/mains/%.cpp
 	@mkdir -p $(@D)
@@ -47,6 +47,11 @@ bin/lexer_main: ${OBJECTS} build/lexer_main.o
 	@g++ ${CPPFLAGS} -MMD -MP $^ -o $@
 
 bin/parser_main: ${OBJECTS} build/parser_main.o
+	@mkdir -p $(@D)
+	@echo "MAIN: Building $@ with all objects linked"
+	@g++ ${CPPFLAGS} -MMD -MP $^ -o $@
+
+bin/c_compiler: ${OBJECTS} build/compiler.o
 	@mkdir -p $(@D)
 	@echo "MAIN: Building $@ with all objects linked"
 	@g++ ${CPPFLAGS} -MMD -MP $^ -o $@
