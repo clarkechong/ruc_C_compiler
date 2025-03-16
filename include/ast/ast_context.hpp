@@ -1,5 +1,9 @@
 #pragma once
 
+#include <iostream>
+#include <memory>
+#include <vector>
+
 namespace ast {
 
 class Context 
@@ -7,4 +11,4 @@ class Context
 
 };
 
-}
+} // namespace ast

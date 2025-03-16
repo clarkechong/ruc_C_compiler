@@ -107,7 +107,7 @@ unary_expression
 unary_operator
 	: '&'	{ }
 	| '*'	{ }
-	| '+'	{ }
+	| '+'	{ } // do nothing for this
 	| '-'	{ }
 	| '~'	{ }
 	| '!'	{ }
@@ -183,7 +183,7 @@ assignment_expression
 
 assignment_operator
 	: '='				{ }
-	| MUL_ASSIGN		{ }
+	| MUL_ASSIGN		{ } // for these, just do e.g. new MulOperator(), then in assignment expression assign left_ and right_ 
 	| DIV_ASSIGN		{ }
 	| MOD_ASSIGN		{ }
 	| ADD_ASSIGN		{ }
