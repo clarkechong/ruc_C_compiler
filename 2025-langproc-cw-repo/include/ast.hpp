@@ -20,6 +20,8 @@
 #include "ast_assignment.hpp"
 #include "ast_externdef.hpp"
 #include "ast_paramdecl.hpp"
+#include "ast_argdecl.hpp"
+#include "ast_funcprim.hpp"
 #include "Operators/Arithmetic/ast_addition.hpp"
 #include "Operators/Arithmetic/ast_subtraction.hpp"
 #include "Operators/Arithmetic/ast_multiply.hpp"

@@ -9,8 +9,8 @@ void FunctionDefinition::EmitRISC(std::ostream& stream, Context& context) const
     // the concept of directives and correct them.
     stream << ".text" << std::endl;
     stream << ".globl ";
+    context.newsymboltable();
     declarator_->EmitRISC(stream, context);
-
     if (compound_statement_ != nullptr)
     {
         compound_statement_->EmitRISC(stream, context);
@@ -24,6 +24,13 @@ void FunctionDefinition::Print(std::ostream& stream) const
 
     declarator_->Print(stream);
 
+    if(declaration_list_ != nullptr){
+        declaration_list_->Print(stream);
+    }
+    else{
+        stream << "(";
+        stream << ") {" <<std::endl;
+    }
     if (compound_statement_ != nullptr)
     {
         compound_statement_->Print(stream);

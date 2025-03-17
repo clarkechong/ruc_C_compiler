@@ -3,17 +3,28 @@
 
 namespace ast{
 
-Context::Context(){}
+Context::Context(){
+    symbolTable_.emplace_back();
+}
 
+
+void Context::newsymboltable(){
+    currentsymboltable++;
+    symbolTable_.emplace_back();
+    offset_ = -20;
+    branch_enum = 2;
+    reggie = -1;
+    argie = -1;
+}
 
 void Context::AllocateVariable(const std::string& name)  {
-    symbolTable_.AllocateVariable(name,offset_);
+    symbolTable_[currentsymboltable].AllocateVariable(name,offset_);
     offset_ -= 4;
 }
 
 
 int Context::GetVariableOffset(const std::string& name) const {
-    return symbolTable_.GetVariableOffset(name);
+    return symbolTable_[currentsymboltable].GetVariableOffset(name);
 }
 
 int Context::Branchoffset() {
@@ -24,6 +35,11 @@ int Context::Branchoffset() {
 int Context::Paramreg(){
     reggie++;
     return reggie;
+}
+
+int Context::Argreg(){
+    argie++;
+    return argie;
 }
 
 }

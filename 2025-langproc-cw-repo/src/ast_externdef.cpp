@@ -10,7 +10,9 @@ void Externdef::EmitRISC(std::ostream& stream, Context& context) const
 
 void Externdef::Print(std::ostream& stream) const
 {
-    stream << type_ <<  identifier_ << "();" << std::endl;
+    stream << type_;
+    identifier_->Print(stream);
+    stream << "();" << std::endl;
 }
 
 

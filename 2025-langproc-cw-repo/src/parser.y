@@ -36,15 +36,15 @@
 %token STRUCT UNION ENUM ELLIPSIS
 %token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
 
-%type <node> translation_unit external_declaration function_definition primary_expression postfix_expression
+%type <node> external_declaration function_definition primary_expression postfix_expression
 %type <node> unary_expression cast_expression multiplicative_expression additive_expression shift_expression relational_expression
 %type <node> equality_expression and_expression exclusive_or_expression inclusive_or_expression logical_and_expression logical_or_expression
 %type <node> conditional_expression assignment_expression expression declarator direct_declarator statement compound_statement jump_statement declaration Assignment
 %type <node> constant_initialiser
 %type <node> selection_statement iteration_statement
-%type <node> parameter_declaration
+%type <node> parameter_declaration argument_expression
 
-%type <node_list> statement_list declaration_list parameter_list
+%type <node_list> statement_list declaration_list parameter_list translation_unit argument_expression_list
 
 %type <number_int> INT_CONSTANT STRING_LITERAL
 %type <number_float> FLOAT_CONSTANT
@@ -59,12 +59,13 @@ ROOT
     : translation_unit { g_root = $1; }
 
 translation_unit
-	: external_declaration { $$ = $1; }
+	: external_declaration { $$ = new NodeList(NodePtr($1));}
+    | translation_unit external_declaration { $1->PushBack(NodePtr($2)); $$=$1; }
 	;
 
 external_declaration
 	: function_definition { $$ = $1; }
-	| declaration_specifiers declarator ';' {
+	| declaration_specifiers declarator '(' ')' ';' {
 		$$ = new Externdef($1,NodePtr($2));
 	}
 	;
@@ -94,7 +95,8 @@ declarator
 
 declaration
 	:declaration_specifiers IDENTIFIER ';' {
-		$$ = new Variable($1,*($2));
+		$$ = new Variable($1,std::move(*$2));
+		delete $2;
 	}
 	;
 
@@ -192,7 +194,10 @@ primary_expression
 	: INT_CONSTANT {
 		$$ = new IntConstant($1);
 	}
-	| direct_declarator
+	| IDENTIFIER {
+		$$ = new Identifier(std::move(*$1));
+		delete $1;
+    }
 	;
 
 postfix_expression
@@ -200,11 +205,30 @@ postfix_expression
 	| postfix_expression INC_OP {
 		$$ = new Incr(NodePtr($1));
 	}
+    | postfix_expression '(' ')' {
+        $$ = new Funcprim(NodePtr($1),nullptr);
+    }
+    | postfix_expression '(' argument_expression_list  ')'{
+        $$ = new Funcprim(NodePtr($1),NodePtr($3));
+    }
+	;
+
+argument_expression_list
+    : argument_expression {$$ = new NodeList(NodePtr($1)); }
+    | argument_expression_list ',' argument_expression{
+        $1->PushBack(NodePtr($3)); $$=$1;
+    }
+    ;
+
+argument_expression
+	: assignment_expression {
+		$$ = new Argdecl(NodePtr($1));
+	}
 	;
 
 unary_expression
 	: postfix_expression
-	| '-' expression {
+	| '-' unary_expression {
 		$$ = new Unary(NodePtr($2));
 	}
 	;
@@ -215,23 +239,23 @@ cast_expression
 
 multiplicative_expression
 	: cast_expression
-	| expression '*' expression{
+	| multiplicative_expression '*' cast_expression{
 		$$ = new Multiply(NodePtr($1),NodePtr($3));
 	}
-	| expression '/' expression{
+	| multiplicative_expression '/' cast_expression{
 		$$ = new Divide(NodePtr($1),NodePtr($3));
 	}
-	| expression '%' expression{
+	| multiplicative_expression '%' cast_expression{
 		$$ = new Modulus(NodePtr($1),NodePtr($3));
 	}
 	;
 
 additive_expression
 	: multiplicative_expression
-	| expression '+' expression{
+	| additive_expression '+' multiplicative_expression{
 		$$ = new Addition(NodePtr($1),NodePtr($3));
 	}
-	| expression '-' expression{
+	| additive_expression '-' multiplicative_expression{
 		$$ = new Subtraction(NodePtr($1),NodePtr($3));
 	}
 	;
@@ -242,26 +266,26 @@ shift_expression
 
 relational_expression
 	: shift_expression
-	| expression '>' expression {
+	| relational_expression  '>' shift_expression {
 		$$ = new Greater(NodePtr($1),NodePtr($3));
 	}
-	| expression GE_OP expression {
+	| relational_expression  GE_OP shift_expression {
 		$$ = new Geq(NodePtr($1),NodePtr($3));
 	}
-	| expression '<' expression {
+	| relational_expression  '<' shift_expression {
 		$$ = new Less(NodePtr($1),NodePtr($3));
 	}
-	| expression LE_OP expression {
-		$$ = new Geq(NodePtr($1),NodePtr($3));
+	| relational_expression  LE_OP shift_expression {
+		$$ = new Leq(NodePtr($1),NodePtr($3));
 	}
 	;
 
 equality_expression
 	: relational_expression
-	| expression EQ_OP expression{
+	| equality_expression  EQ_OP relational_expression{
 		$$ = new Equality(NodePtr($1),NodePtr($3));
 	}
-	| expression NE_OP expression{
+	| equality_expression  NE_OP relational_expression{
 		$$ = new Neq(NodePtr($1),NodePtr($3));
 	}
 	;

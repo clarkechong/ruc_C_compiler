@@ -2,6 +2,7 @@
 #include "ast_symboltable.hpp"
 #include <iostream>
 #include <unordered_map>
+#include <vector>
 
 
 namespace ast {
@@ -10,21 +11,27 @@ namespace ast {
 // compiled (e.g. function scope and variable names).
 class Context {
     private:
-        SymbolTable symbolTable_;
+        std::vector <SymbolTable> symbolTable_;
+        int currentsymboltable = 0;
         int offset_ = -20;
         int branch_enum = 2;
         int reggie = -1;
+        int argie = -1;
 
     public:
         Context();
+
+        void newsymboltable();
 
         void AllocateVariable(const std::string& name) ;
 
         int GetVariableOffset(const std::string& name) const ;
 
-        int Branchoffset() ;
+        int Branchoffset();
 
-        int Paramreg() ;
+        int Paramreg();
+
+        int Argreg();
 };
 
 } // namespace ast
