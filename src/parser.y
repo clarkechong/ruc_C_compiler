@@ -60,14 +60,32 @@
 // %type <number_float> FLOAT_CONSTANT
 
 %type <node_list> translation_unit 
-%type <node> external_declaration function_definition
+%type <node> external_declaration function_definition declaration
+%type <node> type_specifier declaration_specifiers
 
 %start ROOT
 
 %%
 
 ROOT
-	: translation_unit 		{ g_root = new ArrayDeclarator(); }
+	: translation_unit 		{ g_root = $1; }
+	;
+
+translation_unit
+	: external_declaration 						{ $$ = new NodeList(NodePtr($1)); }
+	| translation_unit external_declaration 	{ $1->Push(NodePtr($2)); }
+	;
+
+external_declaration
+	: function_definition 		{ $$ = $1; }
+	| declaration 				{ $$ = $1; }
+	;
+
+function_definition
+	: declaration_specifiers declarator compound_statement { }
+	// | declarator compound_statement											// ignore
+	// | declaration_specifiers declarator declaration_list compound_statement 	// OLD K&R STYLE
+	// | declarator declaration_list compound_statement 						// OLD K&R STYLE
 	;
 
 primary_expression
@@ -209,11 +227,11 @@ declaration
 	| declaration_specifiers init_declarator_list ';'	{ }
 	;
 
-declaration_specifiers
+declaration_specifiers // only considering single types
 	// : storage_class_specifier
 	// | storage_class_specifier declaration_specifiers
 	: TYPEDEF declaration_specifiers				{ }
-	| type_specifier								{ }
+	| type_specifier								{ $$ = $1; }
 	| type_specifier declaration_specifiers			{ }
 	// | type_qualifier
 	// | type_qualifier declaration_specifiers
@@ -238,15 +256,15 @@ init_declarator
 // 	;
 
 type_specifier
-	: VOID					{ }
-	| CHAR					{ }
+	: VOID					{ $$ = new DeclarationType(TypeSpecifier::VOID); }
+	| CHAR					{ $$ = new DeclarationType(TypeSpecifier::CHAR); }
 	// | SHORT
-	| INT					{ }
+	| INT					{ $$ = new DeclarationType(TypeSpecifier::INT); }
 	// | LONG
-	| FLOAT					{ }
-	| DOUBLE				{ }
-	| SIGNED				{ }
-	| UNSIGNED				{ }
+	| FLOAT					{ $$ = new DeclarationType(TypeSpecifier::FLOAT); }
+	| DOUBLE				{ $$ = new DeclarationType(TypeSpecifier::DOUBLE); }
+	| SIGNED				{ $$ = new DeclarationType(TypeSpecifier::INT); }
+	| UNSIGNED				{ $$ = new DeclarationType(TypeSpecifier::UNSIGNED_INT); }
 	| struct_specifier		{ }
 	| enum_specifier		{ }
 	| TYPE_NAME				{ }
@@ -310,12 +328,12 @@ declarator
 	;
 
 direct_declarator
-	: IDENTIFIER										{ }
+	: IDENTIFIER										{ } // new Identifier
 	| '(' declarator ')' 								{ }	// { /* $$ = $2 */ }
 	| direct_declarator '[' constant_expression ']' 	{ }	// array declarator
 	| direct_declarator '[' ']' 						{ }	// array declarator
-	| direct_declarator '(' parameter_list ')'			{ }
-	| direct_declarator '(' ')'							{ }
+	| direct_declarator '(' parameter_list ')'			{ }	// function declarator
+	| direct_declarator '(' ')'							{ }	// function declarator
 	// | direct_declarator '(' identifier_list ')' // OLD K&R STYLE
 	;
 
@@ -404,10 +422,10 @@ labeled_statement
 	;
 
 compound_statement // compound statement = block = scope
-	: '{' '}' 									{ }				//{/* new scope null */}
-	| '{' statement_list '}' 					{ }				//{ /* new scope initiate with STATEMENTS */ }
-	| '{' declaration_list '}' 					{ }				//{ /* new scope initiate with DECLARATIONS */ }
-	| '{' declaration_list statement_list '}' 	{ }				//{ /* new scope initiate with STATEMENTS + DECLARATIONS $1 and $2 */ }
+	: '{' '}' 									{ }				// { /* new scope null */}
+	| '{' statement_list '}' 					{ }				// { /* new scope initiate with STATEMENTS */ }
+	| '{' declaration_list '}' 					{ }				// { /* new scope initiate with DECLARATIONS */ }
+	| '{' declaration_list statement_list '}' 	{ }				// { /* new scope initiate with STATEMENTS + DECLARATIONS $1 and $2 */ }
 	;
 
 declaration_list
@@ -444,23 +462,6 @@ jump_statement
 	| BREAK ';'					{ }
 	| RETURN ';'				{ }
 	| RETURN expression ';'		{ }
-	;
-
-translation_unit
-	: external_declaration 						{ }
-	| translation_unit external_declaration 	{ }
-	;
-
-external_declaration
-	: function_definition 		{ }
-	| declaration 				{ }
-	;
-
-function_definition
-	: declaration_specifiers declarator compound_statement { }
-	// | declarator compound_statement											// ignore
-	// | declaration_specifiers declarator declaration_list compound_statement 	// OLD K&R STYLE
-	// | declarator declaration_list compound_statement 						// OLD K&R STYLE
 	;
 
 %%
