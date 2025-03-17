@@ -13,7 +13,7 @@
 
 int main(int argc, char** argv) {
 
-    ParseAST(argv[1]);
+    ParseAST(argv[1])->Print(std::cout, 0);
 
     return 0;
     

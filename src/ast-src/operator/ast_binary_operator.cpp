@@ -12,16 +12,6 @@ BinaryOperator::BinaryOperator(NodePtr left_op, NodePtr right_op)
 {
 }
 
-void BinaryOperator::SetLeftOp(NodePtr left_op)
-{
-    left_op_ = std::move(left_op);
-}
-
-void BinaryOperator::SetRightOp(NodePtr right_op)
-{
-    right_op_ = std::move(right_op);
-}
-
 void BinaryOperator::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context& context) const 
 {
 }

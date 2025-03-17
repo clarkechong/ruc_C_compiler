@@ -6,6 +6,11 @@ AddressOp::AddressOp()
 {
 }
 
+AddressOp::AddressOp(NodePtr operand)
+    : UnaryOperator(std::move(operand))
+{
+}
+
 void AddressOp::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context& context) const 
 {
 }

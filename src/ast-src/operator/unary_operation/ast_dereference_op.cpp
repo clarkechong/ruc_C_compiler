@@ -6,6 +6,11 @@ DereferenceOp::DereferenceOp()
 {
 }
 
+DereferenceOp::DereferenceOp(NodePtr operand)
+    : UnaryOperator(std::move(operand))
+{
+}
+
 void DereferenceOp::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context& context) const 
 {
 }

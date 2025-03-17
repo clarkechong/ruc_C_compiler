@@ -6,6 +6,6 @@
 //     return hello;   // identifier
 // }
 
-int f() {
+int fUCKINGFUNCTIONSZZZZZZZ() {
     return 0;
 }
