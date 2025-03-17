@@ -32,36 +32,32 @@
 %token STRUCT UNION ENUM ELLIPSIS
 %token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
 
-// %type <node> primary_expression postfix_expression unary_expression
-// %type <node> multiplicative_expression additive_expression shift_expression
-// %type <node> relational_expression equality_expression and_expression
-// %type <node> exclusive_or_expression inclusive_or_expression logical_and_expression
-// %type <node> logical_or_expression conditional_expression assignment_expression
-// %type <node> expression constant_expression
+%type <node> primary_expression postfix_expression unary_expression
+%type <node> multiplicative_expression additive_expression shift_expression
+%type <node> relational_expression equality_expression and_expression
+%type <node> exclusive_or_expression inclusive_or_expression logical_and_expression
+%type <node> logical_or_expression conditional_expression assignment_expression
+%type <node> expression constant_expression
 
-// %type <node> declaration init_declarator
-// %type <node> declaration_specifiers type_specifier
-// %type <node> struct_specifier struct_declaration
-// %type <node> struct_declarator declarator
-// %type <node> enum_specifier enumerator direct_declarator pointer
+%type <node> declaration init_declarator
+%type <node> declaration_specifiers type_specifier
+%type <node> struct_specifier struct_declaration
+%type <node> struct_declarator declarator
+%type <node> enum_specifier enumerator direct_declarator pointer
 
-// %type <node> parameter_declaration type_name abstract_declarator direct_abstract_declarator
-// %type <node> initializer statement labeled_statement compound_statement
-// %type <node> expression_statement selection_statement iteration_statement
-// %type <node> jump_statement external_declaration function_definition
+%type <node> parameter_declaration type_name abstract_declarator direct_abstract_declarator
+%type <node> initializer statement labeled_statement compound_statement
+%type <node> expression_statement selection_statement iteration_statement
+%type <node> jump_statement external_declaration function_definition
 
-// %type <node_list> translation_unit struct_declaration_list argument_expression_list
-// %type <node_list> specifier_qualifier_list struct_declarator_list
-// %type <node_list> enumerator_list parameter_list
-// %type <node_list> identifier_list initializer_list declaration_list statement_list
+%type <node_list> translation_unit struct_declaration_list argument_expression_list
+%type <node_list> specifier_qualifier_list struct_declarator_list
+%type <node_list> enumerator_list parameter_list
+%type <node_list> initializer_list declaration_list statement_list
 
-// %type <string> IDENTIFIER STRING_LITERAL
-// %type <number_int> INT_CONSTANT
-// %type <number_float> FLOAT_CONSTANT
-
-%type <node_list> translation_unit 
-%type <node> external_declaration function_definition declaration
-%type <node> type_specifier declaration_specifiers
+%type <string> IDENTIFIER STRING_LITERAL
+%type <number_int> INT_CONSTANT
+%type <number_float> FLOAT_CONSTANT
 
 %start ROOT
 
@@ -90,7 +86,7 @@ function_definition
 
 primary_expression
 	: IDENTIFIER 			{ }
-	| INT_CONSTANT 			{ }
+	| INT_CONSTANT 			{ new Integer($1); }
 	| FLOAT_CONSTANT 		{ }
 	| STRING_LITERAL 		{ }
 	| CHAR_LITERAL 			{ }

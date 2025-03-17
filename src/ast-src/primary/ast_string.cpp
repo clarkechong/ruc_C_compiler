@@ -2,6 +2,8 @@
 
 namespace ast {
 
+String::String(std::string value) : value_(value) {}
+
 void String::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context& context) const 
 {
 }

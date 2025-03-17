@@ -12,7 +12,7 @@ namespace ast {
 class Float : public Node 
 {
     public:
-        Float(float value) : value_(value) {};
+        Float(float value);
 
         virtual void EmitRISCV(std::ostream &stream, const std::string &dst_reg, Context &context) const override;
         virtual void Print(std::ostream &stream, int indent) const override;
