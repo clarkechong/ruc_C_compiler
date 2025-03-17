@@ -364,7 +364,7 @@ parameter_list
 	;
 
 parameter_declaration
-	: declaration_specifiers declarator					{ /* Parameter with name */ }
+	: declaration_specifiers declarator					{ $$ = new Declaration(NodePtr($1), NodePtr($2)); }
 	| declaration_specifiers abstract_declarator		{ /* Parameter with abstract declarator */ }
 	| declaration_specifiers							{ /* Parameter with type only */ }
 	;

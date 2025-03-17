@@ -11,6 +11,7 @@ void DeclarationType::EmitRISCV(std::ostream& stream, const std::string& dst_reg
 
 void DeclarationType::Print(std::ostream& stream, indent_t indent) const 
 {
+    stream << indent << type_;
 }
 
 } // namespace ast

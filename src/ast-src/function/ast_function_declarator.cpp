@@ -18,7 +18,13 @@ void FunctionDeclarator::EmitRISCV(std::ostream& stream, const std::string& dst_
 
 void FunctionDeclarator::Print(std::ostream& stream, indent_t indent) const 
 {
-    std::cout<<indent<<"fdsjkflsd"; //HERE
+    direct_declarator_->Print(stream, 0);
+    stream << "(";
+    if (parameter_list_)
+    {
+        parameter_list_->Print(stream, 0);
+    }
+    stream << ")";
 }
 
 std::string FunctionDeclarator::GetID() const 
