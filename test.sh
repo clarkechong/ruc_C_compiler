@@ -3,5 +3,5 @@
 if ! python3 --version > /dev/null 2>&1; then
     . scripts/test.sh
 else
-    ./scripts/test.py $@
+    ./scripts/test.py $@ --no_clean
 fi
