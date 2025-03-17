@@ -23,7 +23,7 @@ class UnaryOperator : public Node
         virtual void Print(std::ostream &stream, int indent) const override;
 
 
-    private:
+    protected:
         NodePtr op_;
 };
 

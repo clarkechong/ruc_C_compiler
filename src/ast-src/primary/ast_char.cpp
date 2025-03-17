@@ -30,7 +30,6 @@ Char::Char(std::string value) {
     } else {
         value_ = value[1];
     }
-    std::cout << "new char for yo mama: " << value_ << "\n";
 }
 
 void Char::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context& context) const 
@@ -39,6 +38,7 @@ void Char::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context& 
 
 void Char::Print(std::ostream& stream, int indent) const 
 {
+    stream << '\'' << value_ << '\'';
 }
 
 } // namespace ast

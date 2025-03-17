@@ -73,8 +73,8 @@ translation_unit
 	;
 
 external_declaration
-	: function_definition 		{ $$ = $1; }
-	| declaration 				{ $$ = $1; }
+	: function_definition 		{ $$ = std::move($1); }
+	| declaration 				{ $$ = std::move($1); }
 	;
 
 function_definition
@@ -90,11 +90,11 @@ primary_expression
 	| FLOAT_CONSTANT 		{ new Float($1); }
 	| STRING_LITERAL 		{ new String(*$1); }
 	| CHAR_LITERAL 			{ new Char(*$1); }
-	| '(' expression ')'	{ $$ = $2; }
+	| '(' expression ')'	{ $$ = std::move($2); }
 	;
 
 postfix_expression
-	: primary_expression									{ }
+	: primary_expression									{ $$ = std::move($1); }
 	| postfix_expression '[' expression ']'					{ }
 	| postfix_expression '(' ')'							{ }
 	| postfix_expression '(' argument_expression_list ')'	{ }
@@ -227,7 +227,7 @@ declaration_specifiers // only considering single types
 	// : storage_class_specifier
 	// | storage_class_specifier declaration_specifiers
 	: TYPEDEF declaration_specifiers				{ }
-	| type_specifier								{ $$ = $1; }
+	| type_specifier								{ $$ = std::move($1); }
 	| type_specifier declaration_specifiers			{ }
 	// | type_qualifier
 	// | type_qualifier declaration_specifiers
@@ -325,7 +325,7 @@ declarator
 
 direct_declarator
 	: IDENTIFIER										{ } // new Identifier
-	| '(' declarator ')' 								{ }	// { /* $$ = $2 */ }
+	| '(' declarator ')' 								{ }	// { /* $$ = std::move($2) */ }
 	| direct_declarator '[' constant_expression ']' 	{ }	// array declarator
 	| direct_declarator '[' ']' 						{ }	// array declarator
 	| direct_declarator '(' parameter_list ')'			{ }	// function declarator
