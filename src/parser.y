@@ -17,7 +17,6 @@
 	NodeList*   		node_list;
 	int          		number_int;
 	double       		number_float;
-	char				literal_char;
 	std::string* 		string;
 	TypeSpecifier		type_specifier;
 	yytokentype  		token;
@@ -56,10 +55,9 @@
 %type <node_list> enumerator_list parameter_list
 %type <node_list> initializer_list declaration_list statement_list
 
-%type <string> IDENTIFIER STRING_LITERAL
+%type <string> IDENTIFIER STRING_LITERAL CHAR_LITERAL
 %type <number_int> INT_CONSTANT
 %type <number_float> FLOAT_CONSTANT
-%type <literal_char> CHAR_LITERAL
 
 %start ROOT
 
@@ -91,8 +89,8 @@ primary_expression
 	| INT_CONSTANT 			{ new Integer($1); }
 	| FLOAT_CONSTANT 		{ new Float($1); }
 	| STRING_LITERAL 		{ new String(*$1); }
-	| CHAR_LITERAL 			{ new Char($1); } // not working fix this
-	| '(' expression ')'	{ }
+	| CHAR_LITERAL 			{ new Char(*$1); }
+	| '(' expression ')'	{ $$ = $2; }
 	;
 
 postfix_expression
