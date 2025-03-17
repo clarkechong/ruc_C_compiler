@@ -2,7 +2,9 @@
 
 namespace ast {
 
-Char::Char(char value) : value_(value) {}
+Char::Char(char value) : value_(value) {
+    std::cout << "new integer for yo mama: " << value_ << "\n";
+}
 
 void Char::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context& context) const 
 {

@@ -2,7 +2,9 @@
 
 namespace ast {
 
-String::String(std::string value) : value_(value) {}
+String::String(std::string value) : value_(value) {
+    // std::cout << "new string for yo mama: " << value_ << "\n";
+}
 
 void String::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context& context) const 
 {
