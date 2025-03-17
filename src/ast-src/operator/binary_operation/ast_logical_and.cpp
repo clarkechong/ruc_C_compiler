@@ -16,7 +16,7 @@ void LogicalAnd::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Con
 {
 }
 
-void LogicalAnd::Print(std::ostream& stream, int indent) const 
+void LogicalAnd::Print(std::ostream& stream, indent_t indent) const 
 {
 }
 

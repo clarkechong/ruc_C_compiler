@@ -15,7 +15,7 @@ void DereferenceOp::EmitRISCV(std::ostream& stream, const std::string& dst_reg, 
 {
 }
 
-void DereferenceOp::Print(std::ostream& stream, int indent) const 
+void DereferenceOp::Print(std::ostream& stream, indent_t indent) const 
 {
 }
 

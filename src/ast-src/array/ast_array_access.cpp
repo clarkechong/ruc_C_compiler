@@ -16,7 +16,7 @@ void ArrayAccess::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Co
 {
 }
 
-void ArrayAccess::Print(std::ostream& stream, int indent) const 
+void ArrayAccess::Print(std::ostream& stream, indent_t indent) const 
 {
 }
 

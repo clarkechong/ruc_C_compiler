@@ -16,7 +16,7 @@ void LessThan::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Conte
 {
 }
 
-void LessThan::Print(std::ostream& stream, int indent) const 
+void LessThan::Print(std::ostream& stream, indent_t indent) const 
 {
 }
 

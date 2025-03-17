@@ -10,7 +10,7 @@ void Identifier::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Con
 {
 }
 
-void Identifier::Print(std::ostream& stream, int indent) const 
+void Identifier::Print(std::ostream& stream, indent_t indent) const 
 {
     stream << id_;
 }

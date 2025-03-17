@@ -10,7 +10,7 @@ void StructDeclarator::EmitRISCV(std::ostream& stream, const std::string& dst_re
 {
 }
 
-void StructDeclarator::Print(std::ostream& stream, int indent) const 
+void StructDeclarator::Print(std::ostream& stream, indent_t indent) const 
 {
 }
 

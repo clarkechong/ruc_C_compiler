@@ -9,7 +9,7 @@ void Float::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context&
 {
 }
 
-void Float::Print(std::ostream& stream, int indent) const 
+void Float::Print(std::ostream& stream, indent_t indent) const 
 {
     stream << value_;
 }

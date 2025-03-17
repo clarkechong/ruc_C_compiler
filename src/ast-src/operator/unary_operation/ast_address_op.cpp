@@ -15,7 +15,7 @@ void AddressOp::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Cont
 {
 }
 
-void AddressOp::Print(std::ostream& stream, int indent) const 
+void AddressOp::Print(std::ostream& stream, indent_t indent) const 
 {
 }
 

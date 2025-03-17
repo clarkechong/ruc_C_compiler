@@ -10,7 +10,7 @@ void Default::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Contex
 {
 }
 
-void Default::Print(std::ostream& stream, int indent) const 
+void Default::Print(std::ostream& stream, indent_t indent) const 
 {
 }
 

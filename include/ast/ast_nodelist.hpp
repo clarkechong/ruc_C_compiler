@@ -15,7 +15,7 @@ class NodeList : public Node
         NodeList(NodePtr first_node);
 
         virtual void EmitRISCV(std::ostream &stream, const std::string &dst_reg, Context &context) const override;
-        virtual void Print(std::ostream &stream, int indent) const override;
+        virtual void Print(std::ostream &stream, indent_t indent) const override;
 
         virtual void Push(NodePtr node);
         virtual int GetNodeCount() const;

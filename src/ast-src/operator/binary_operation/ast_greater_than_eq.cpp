@@ -16,7 +16,7 @@ void GreaterThanEq::EmitRISCV(std::ostream& stream, const std::string& dst_reg, 
 {
 }
 
-void GreaterThanEq::Print(std::ostream& stream, int indent) const 
+void GreaterThanEq::Print(std::ostream& stream, indent_t indent) const 
 {
 }
 

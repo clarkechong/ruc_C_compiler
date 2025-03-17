@@ -16,7 +16,7 @@ void BinaryOperator::EmitRISCV(std::ostream& stream, const std::string& dst_reg,
 {
 }
 
-void BinaryOperator::Print(std::ostream& stream, int indent) const 
+void BinaryOperator::Print(std::ostream& stream, indent_t indent) const 
 {
 
 }

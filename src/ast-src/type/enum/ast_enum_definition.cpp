@@ -10,7 +10,7 @@ void EnumDefinition::EmitRISCV(std::ostream& stream, const std::string& dst_reg,
 {
 }
 
-void EnumDefinition::Print(std::ostream& stream, int indent) const 
+void EnumDefinition::Print(std::ostream& stream, indent_t indent) const 
 {
 }
 
