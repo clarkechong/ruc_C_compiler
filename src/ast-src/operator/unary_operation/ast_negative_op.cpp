@@ -6,6 +6,11 @@ NegativeOp::NegativeOp()
 {
 }
 
+NegativeOp::NegativeOp(NodePtr operand)
+    : UnaryOperator(std::move(operand))
+{
+}
+
 void NegativeOp::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context& context) const 
 {
 }

@@ -12,10 +12,6 @@ UnaryOperator::UnaryOperator(NodePtr operand)
 {
 }
 
-void UnaryOperator::SetOperand(NodePtr operand)
-{
-    op_ = std::move(operand);
-}
 
 void UnaryOperator::EmitRISCV(std::ostream &stream, const std::string &dst_reg, Context &context) const
 {

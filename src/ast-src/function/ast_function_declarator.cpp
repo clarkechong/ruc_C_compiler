@@ -3,6 +3,12 @@
 namespace ast {
 
 FunctionDeclarator::FunctionDeclarator() 
+    : direct_declarator_(nullptr), parameter_list_(nullptr)
+{
+}
+
+FunctionDeclarator::FunctionDeclarator(NodePtr direct_declarator, NodePtr parameter_list)
+    : direct_declarator_(std::move(direct_declarator)), parameter_list_(std::move(parameter_list))
 {
 }
 
@@ -16,6 +22,12 @@ void FunctionDeclarator::Print(std::ostream& stream, int indent) const
 
 std::string FunctionDeclarator::GetID() const 
 {
+    if (direct_declarator_) {
+        Declarator* declarator = dynamic_cast<Declarator*>(direct_declarator_.get());
+        if (declarator) {
+            return declarator->GetID();
+        }
+    }
     return ""; 
 }
 
