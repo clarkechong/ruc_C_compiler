@@ -12,6 +12,7 @@ namespace ast {
 class IfElse : public Node 
 {
     public:
+        IfElse();
         IfElse(NodePtr condition, NodePtr if_statement, NodePtr else_statement);
 
         virtual void EmitRISCV(std::ostream &stream, const std::string &dst_reg, Context &context) const override;

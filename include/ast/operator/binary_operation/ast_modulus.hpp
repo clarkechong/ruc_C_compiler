@@ -14,13 +14,10 @@ class Modulus : public BinaryOperator
 {
     public:
         Modulus();
+        Modulus(NodePtr left, NodePtr right);
 
         virtual void EmitRISCV(std::ostream &stream, const std::string &dst_reg, Context &context) const override;
         virtual void Print(std::ostream &stream, int indent) const override;
-
-
-    private:
-        ;
 };
 
 } // namespace ast

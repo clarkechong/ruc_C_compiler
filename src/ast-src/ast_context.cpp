@@ -70,8 +70,6 @@ void Context::ExitScope(std::ostream& dst) {
         throw std::runtime_error("Cannot exit global scope");
     }
     
-    // In real code, we would adjust stack pointer here
-    // But we'll do that in the actual code generation
 }
 
 int Context::AllocateStackSpace(int size) {

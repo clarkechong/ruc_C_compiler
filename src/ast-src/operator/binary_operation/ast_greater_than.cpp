@@ -3,6 +3,12 @@
 namespace ast {
 
 GreaterThan::GreaterThan() 
+    : BinaryOperator()
+{
+}
+
+GreaterThan::GreaterThan(NodePtr left, NodePtr right)
+    : BinaryOperator(std::move(left), std::move(right))
 {
 }
 

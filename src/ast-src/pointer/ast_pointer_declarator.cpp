@@ -3,6 +3,12 @@
 namespace ast {
 
 PointerDeclarator::PointerDeclarator() 
+    : pointer_(nullptr), direct_declarator_(nullptr)
+{
+}
+
+PointerDeclarator::PointerDeclarator(NodePtr pointer, NodePtr direct_declarator)
+    : pointer_(std::move(pointer)), direct_declarator_(std::move(direct_declarator))
 {
 }
 

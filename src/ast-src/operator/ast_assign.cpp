@@ -3,6 +3,12 @@
 namespace ast {
 
 Assign::Assign() 
+    : BinaryOperator()
+{
+}
+
+Assign::Assign(NodePtr left, NodePtr right)
+    : BinaryOperator(std::move(left), std::move(right))
 {
 }
 

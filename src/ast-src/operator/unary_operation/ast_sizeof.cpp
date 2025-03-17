@@ -2,7 +2,13 @@
 
 namespace ast {
 
-SizeOf::SizeOf() 
+SizeOf::SizeOf()
+    : UnaryOperator()
+{
+}
+
+SizeOf::SizeOf(NodePtr operand)
+    : UnaryOperator(std::move(operand))
 {
 }
 

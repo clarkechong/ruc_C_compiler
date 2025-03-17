@@ -3,6 +3,12 @@
 namespace ast {
 
 Multiply::Multiply() 
+    : BinaryOperator()
+{
+}
+
+Multiply::Multiply(NodePtr left, NodePtr right)
+    : BinaryOperator(std::move(left), std::move(right))
 {
 }
 

@@ -14,13 +14,15 @@ class PointerDeclarator : public Declarator
 {
     public:
         PointerDeclarator();
+        PointerDeclarator(NodePtr pointer, NodePtr direct_declarator);
 
         virtual void EmitRISCV(std::ostream &stream, const std::string &dst_reg, Context &context) const override;
         virtual void Print(std::ostream &stream, int indent) const override;
         virtual std::string GetID() const override;
 
     private:
-        ;
+        NodePtr pointer_;
+        NodePtr direct_declarator_;
 };
 
 } // namespace ast

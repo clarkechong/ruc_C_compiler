@@ -3,6 +3,12 @@
 namespace ast {
 
 FunctionCall::FunctionCall() 
+    : function_(nullptr), arguments_(nullptr)
+{
+}
+
+FunctionCall::FunctionCall(NodePtr function, NodePtr arguments)
+    : function_(std::move(function)), arguments_(std::move(arguments))
 {
 }
 

@@ -3,6 +3,12 @@
 namespace ast {
 
 LessThan::LessThan() 
+    : BinaryOperator()
+{
+}
+
+LessThan::LessThan(NodePtr left, NodePtr right)
+    : BinaryOperator(std::move(left), std::move(right))
 {
 }
 

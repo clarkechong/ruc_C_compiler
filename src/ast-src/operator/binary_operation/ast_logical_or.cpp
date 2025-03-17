@@ -3,6 +3,12 @@
 namespace ast {
 
 LogicalOr::LogicalOr() 
+    : BinaryOperator()
+{
+}
+
+LogicalOr::LogicalOr(NodePtr left, NodePtr right)
+    : BinaryOperator(std::move(left), std::move(right))
 {
 }
 

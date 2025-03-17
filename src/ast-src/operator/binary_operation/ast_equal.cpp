@@ -3,6 +3,12 @@
 namespace ast {
 
 Equal::Equal() 
+    : BinaryOperator()
+{
+}
+
+Equal::Equal(NodePtr left, NodePtr right)
+    : BinaryOperator(std::move(left), std::move(right))
 {
 }
 

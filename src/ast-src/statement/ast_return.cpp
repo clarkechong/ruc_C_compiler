@@ -3,6 +3,12 @@
 namespace ast {
 
 Return::Return() 
+    : expr_(nullptr)
+{
+}
+
+Return::Return(NodePtr expr)
+    : expr_(std::move(expr))
 {
 }
 
