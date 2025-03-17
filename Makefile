@@ -4,12 +4,16 @@ CPPFLAGS += -Wno-unused-function -Wno-unused-parameter -Wno-unused-variable
 CPPFLAGS += -I include/
 CPPFLAGS += -I src/ -I src/generated
 
+HPPFILES := $(shell find include/ src/ -type f -name "*.hpp")
 CPPFILES := $(shell find src/ -type d -name "mains" -prune -o -type f -name "*.cpp" -print)
 CPPFILES += $(filter-out $(CPPFILES), src/generated/parser.tab.cpp src/generated/lexer.yy.cpp) # make sure parser, lexer not added twice
 
 OBJECTS := $(addprefix build/, $(notdir $(CPPFILES:.cpp=.o)))
 
-$(foreach src, $(CPPFILES), $(eval build/$(notdir $(src:.cpp=.o)): $(src)))
+$(foreach src, $(CPPFILES), \
+    $(eval build/$(notdir $(src:.cpp=.o)): $(src) \
+		$(filter $(patsubst %.cpp,%.hpp,$(src)) \
+		$(addprefix include/%,$(notdir $(src:.cpp=.hpp))), $(HPPFILES)))) \
 
 # $< expands to the first listed dependency
 # $@ expands to the build target path
