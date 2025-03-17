@@ -18,6 +18,20 @@ void Scope::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context&
 
 void Scope::Print(std::ostream& stream, indent_t indent) const 
 {
+    stream << indent << "{" << std::endl;
+    
+    indent_t inner_indent = indent;
+    inner_indent++;
+    
+    if (declaration_list_) {
+        declaration_list_->Print(stream, inner_indent);
+    }
+    
+    if (statement_list_) {
+        statement_list_->Print(stream, inner_indent);
+    }
+    
+    stream << indent << "}" << std::endl;
 }
 
 } // namespace ast

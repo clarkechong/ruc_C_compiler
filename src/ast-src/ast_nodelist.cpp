@@ -9,7 +9,13 @@ void NodeList::EmitRISCV(std::ostream &stream, const std::string &dst_reg, Conte
 {}
 
 void NodeList::Print(std::ostream &stream, indent_t indent) const
-{}
+{
+    for (const auto& node : nodes_) {
+        if (node) {
+            node->Print(stream, indent);
+        }
+    }
+}
 
 void NodeList::Push(NodePtr node)
 {

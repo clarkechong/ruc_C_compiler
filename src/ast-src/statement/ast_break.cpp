@@ -12,6 +12,7 @@ void Break::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context&
 
 void Break::Print(std::ostream& stream, indent_t indent) const 
 {
+    stream << indent << "break;" << std::endl;
 }
 
 } // namespace ast

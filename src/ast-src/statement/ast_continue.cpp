@@ -12,6 +12,7 @@ void Continue::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Conte
 
 void Continue::Print(std::ostream& stream, indent_t indent) const 
 {
+    stream << indent << "continue;" << std::endl;
 }
 
 } // namespace ast
