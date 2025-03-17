@@ -1,1 +1,17 @@
 #include "ast/operator/unary_operation/ast_post_inc.hpp"
+
+namespace ast {
+
+PostInc::PostInc() 
+{
+}
+
+void PostInc::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context& context) const 
+{
+}
+
+void PostInc::Print(std::ostream& stream, int indent) const 
+{
+}
+
+} // namespace ast

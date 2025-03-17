@@ -2,16 +2,20 @@
 
 namespace ast {
 
-ArrayDeclarator::ArrayDeclarator() {
+ArrayDeclarator::ArrayDeclarator() 
+{
 }
 
-void ArrayDeclarator::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context& context) const {
+void ArrayDeclarator::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context& context) const 
+{
 }
 
-void ArrayDeclarator::Print(std::ostream& stream, int indent) const {
+void ArrayDeclarator::Print(std::ostream& stream, int indent) const 
+{
 }
 
-std::string ArrayDeclarator::GetID() const {
+std::string ArrayDeclarator::GetID() const 
+{
     return ""; 
 }
 

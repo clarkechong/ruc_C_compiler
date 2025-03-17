@@ -2,8 +2,9 @@
 
 namespace ast {
 
-Node::~Node() {
-
+Node::~Node() 
+{
+    
 }
 
 } // namespace ast
