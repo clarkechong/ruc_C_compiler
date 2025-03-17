@@ -87,8 +87,8 @@ function_definition
 primary_expression
 	: IDENTIFIER 			{ }
 	| INT_CONSTANT 			{ new Integer($1); }
-	| FLOAT_CONSTANT 		{ }
-	| STRING_LITERAL 		{ }
+	| FLOAT_CONSTANT 		{ new Float($1); }
+	| STRING_LITERAL 		{ new String(*$1); }
 	| CHAR_LITERAL 			{ }
 	| '(' expression ')'	{ }
 	;
