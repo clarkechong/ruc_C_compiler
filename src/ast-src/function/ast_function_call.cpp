@@ -16,7 +16,7 @@ void FunctionCall::EmitRISCV(std::ostream& stream, const std::string& dst_reg, C
 {
 }
 
-void FunctionCall::Print(std::ostream& stream, int indent) const 
+void FunctionCall::Print(std::ostream& stream, indent_t indent) const 
 {
 }
 

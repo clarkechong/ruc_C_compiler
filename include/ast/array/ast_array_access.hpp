@@ -16,7 +16,7 @@ class ArrayAccess : public Node
         ArrayAccess(NodePtr array_id, NodePtr index);
 
         virtual void EmitRISCV(std::ostream &stream, const std::string &dst_reg, Context &context) const override;
-        virtual void Print(std::ostream &stream, int indent) const override;
+        virtual void Print(std::ostream &stream, indent_t indent) const override;
 
     private:
         NodePtr array_id_;  // The array identifier

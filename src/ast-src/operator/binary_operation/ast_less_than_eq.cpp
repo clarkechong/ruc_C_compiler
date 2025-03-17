@@ -16,7 +16,7 @@ void LessThanEq::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Con
 {
 }
 
-void LessThanEq::Print(std::ostream& stream, int indent) const 
+void LessThanEq::Print(std::ostream& stream, indent_t indent) const 
 {
 }
 

@@ -16,7 +16,7 @@ void BitwiseXor::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Con
 {
 }
 
-void BitwiseXor::Print(std::ostream& stream, int indent) const 
+void BitwiseXor::Print(std::ostream& stream, indent_t indent) const 
 {
 }
 

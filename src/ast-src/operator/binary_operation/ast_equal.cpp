@@ -16,7 +16,7 @@ void Equal::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context&
 {
 }
 
-void Equal::Print(std::ostream& stream, int indent) const 
+void Equal::Print(std::ostream& stream, indent_t indent) const 
 {
 }
 

@@ -16,7 +16,7 @@ void PostInc::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Contex
 {
 }
 
-void PostInc::Print(std::ostream& stream, int indent) const 
+void PostInc::Print(std::ostream& stream, indent_t indent) const 
 {
 }
 

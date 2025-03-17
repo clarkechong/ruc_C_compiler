@@ -7,6 +7,26 @@
 #include <unordered_map>
 #include "type/ast_type_specifier.hpp"
 
+class indent_t {
+    public:
+        indent_t(int level = 1) : level_(level) {};
+    
+        friend std::ostream& operator<<(std::ostream& os, const indent_t& indent) {
+            for (int i = 0; i < indent.level_; ++i) {
+                os << "    ";
+            }
+            return os;
+        }
+
+        indent_t& operator++(int) {
+            ++level_;
+            return *this;
+        }
+    
+    private:
+        int level_;
+};
+
 namespace ast {
 
 struct Variable_s {
@@ -24,7 +44,8 @@ struct Function_s {
 };
 
 
-class Context {
+class Context 
+{
 public:
     Context();
     ~Context();

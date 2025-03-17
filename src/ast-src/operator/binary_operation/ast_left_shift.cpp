@@ -16,7 +16,7 @@ void LeftShift::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Cont
 {
 }
 
-void LeftShift::Print(std::ostream& stream, int indent) const 
+void LeftShift::Print(std::ostream& stream, indent_t indent) const 
 {
 }
 

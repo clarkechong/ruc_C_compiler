@@ -16,7 +16,7 @@ void Sub::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context& c
 {
 }
 
-void Sub::Print(std::ostream& stream, int indent) const 
+void Sub::Print(std::ostream& stream, indent_t indent) const 
 {
 }
 

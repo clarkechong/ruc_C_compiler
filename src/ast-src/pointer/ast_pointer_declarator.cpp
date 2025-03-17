@@ -16,7 +16,7 @@ void PointerDeclarator::EmitRISCV(std::ostream& stream, const std::string& dst_r
 {
 }
 
-void PointerDeclarator::Print(std::ostream& stream, int indent) const 
+void PointerDeclarator::Print(std::ostream& stream, indent_t indent) const 
 {
 }
 

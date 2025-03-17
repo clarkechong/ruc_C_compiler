@@ -15,7 +15,7 @@ void LogicalNotOp::EmitRISCV(std::ostream& stream, const std::string& dst_reg, C
 {
 }
 
-void LogicalNotOp::Print(std::ostream& stream, int indent) const 
+void LogicalNotOp::Print(std::ostream& stream, indent_t indent) const 
 {
 }
 

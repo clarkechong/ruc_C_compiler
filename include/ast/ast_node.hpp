@@ -14,7 +14,7 @@ class Node
         virtual ~Node();
 
         virtual void EmitRISCV(std::ostream &stream, const std::string &dst_reg, Context &context) const = 0;
-        virtual void Print(std::ostream &stream, int indent) const = 0;
+        virtual void Print(std::ostream &stream, indent_t indent) const = 0;
 };
 
 using NodePtr = std::unique_ptr<Node>;

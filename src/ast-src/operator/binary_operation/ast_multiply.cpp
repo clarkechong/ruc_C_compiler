@@ -16,7 +16,7 @@ void Multiply::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Conte
 {
 }
 
-void Multiply::Print(std::ostream& stream, int indent) const 
+void Multiply::Print(std::ostream& stream, indent_t indent) const 
 {
 }
 

@@ -16,7 +16,7 @@ void Scope::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context&
 {
 }
 
-void Scope::Print(std::ostream& stream, int indent) const 
+void Scope::Print(std::ostream& stream, indent_t indent) const 
 {
 }
 

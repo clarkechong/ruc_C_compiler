@@ -16,7 +16,7 @@ void Switch::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context
 {
 }
 
-void Switch::Print(std::ostream& stream, int indent) const 
+void Switch::Print(std::ostream& stream, indent_t indent) const 
 {
 }
 

@@ -8,7 +8,7 @@ NodeList::NodeList(NodePtr first_node)
 void NodeList::EmitRISCV(std::ostream &stream, const std::string &dst_reg, Context &context) const
 {}
 
-void NodeList::Print(std::ostream &stream, int indent) const
+void NodeList::Print(std::ostream &stream, indent_t indent) const
 {}
 
 void NodeList::Push(NodePtr node)

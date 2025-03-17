@@ -20,8 +20,9 @@ void FunctionDefinition::EmitRISCV(std::ostream& stream, const std::string& dst_
 {
 }
 
-void FunctionDefinition::Print(std::ostream& stream, int indent) const 
+void FunctionDefinition::Print(std::ostream& stream, indent_t indent) const 
 {
+    
 }
 
 } // namespace ast
