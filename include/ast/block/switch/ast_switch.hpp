@@ -13,13 +13,14 @@ class Switch : public Node
 {
     public:
         Switch();
+        Switch(NodePtr expression, NodePtr case_list);
 
         virtual void EmitRISCV(std::ostream &stream, const std::string &dst_reg, Context &context) const override;
         virtual void Print(std::ostream &stream, int indent) const override;
 
-
     private:
-        ;
+        NodePtr expression_;  // The expression to switch on
+        NodePtr case_list_;   // List of case statements
 };
 
 } // namespace ast

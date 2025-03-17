@@ -2,7 +2,13 @@
 
 namespace ast {
 
-PostDec::PostDec() 
+PostDec::PostDec()
+    : UnaryOperator()
+{
+}
+
+PostDec::PostDec(NodePtr operand)
+    : UnaryOperator(std::move(operand))
 {
 }
 

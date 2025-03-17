@@ -3,6 +3,12 @@
 namespace ast {
 
 RightShift::RightShift() 
+    : BinaryOperator()
+{
+}
+
+RightShift::RightShift(NodePtr left, NodePtr right)
+    : BinaryOperator(std::move(left), std::move(right))
 {
 }
 

@@ -3,6 +3,12 @@
 namespace ast {
 
 ArrayAccess::ArrayAccess() 
+    : array_id_(nullptr), index_(nullptr)
+{
+}
+
+ArrayAccess::ArrayAccess(NodePtr array_id, NodePtr index)
+    : array_id_(std::move(array_id)), index_(std::move(index))
 {
 }
 

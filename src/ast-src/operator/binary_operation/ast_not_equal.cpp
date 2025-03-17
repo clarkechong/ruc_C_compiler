@@ -3,6 +3,12 @@
 namespace ast {
 
 NotEqual::NotEqual() 
+    : BinaryOperator()
+{
+}
+
+NotEqual::NotEqual(NodePtr left, NodePtr right)
+    : BinaryOperator(std::move(left), std::move(right))
 {
 }
 

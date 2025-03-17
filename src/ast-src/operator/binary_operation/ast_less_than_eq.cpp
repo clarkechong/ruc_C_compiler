@@ -3,6 +3,12 @@
 namespace ast {
 
 LessThanEq::LessThanEq() 
+    : BinaryOperator()
+{
+}
+
+LessThanEq::LessThanEq(NodePtr left, NodePtr right)
+    : BinaryOperator(std::move(left), std::move(right))
 {
 }
 

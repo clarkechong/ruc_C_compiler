@@ -18,10 +18,12 @@ class UnaryOperator : public Node
 {
     public:
         UnaryOperator();
+        UnaryOperator(NodePtr operand);
 
         virtual void EmitRISCV(std::ostream &stream, const std::string &dst_reg, Context &context) const override;
         virtual void Print(std::ostream &stream, int indent) const override;
 
+        void SetOperand(NodePtr operand);
 
     protected:
         NodePtr op_;

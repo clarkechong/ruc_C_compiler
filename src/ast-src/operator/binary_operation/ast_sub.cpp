@@ -3,6 +3,12 @@
 namespace ast {
 
 Sub::Sub() 
+    : BinaryOperator()
+{
+}
+
+Sub::Sub(NodePtr left, NodePtr right)
+    : BinaryOperator(std::move(left), std::move(right))
 {
 }
 

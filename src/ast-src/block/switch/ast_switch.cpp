@@ -3,6 +3,12 @@
 namespace ast {
 
 Switch::Switch() 
+    : expression_(nullptr), case_list_(nullptr)
+{
+}
+
+Switch::Switch(NodePtr expression, NodePtr case_list)
+    : expression_(std::move(expression)), case_list_(std::move(case_list))
 {
 }
 

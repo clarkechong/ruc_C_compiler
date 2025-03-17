@@ -3,6 +3,12 @@
 namespace ast {
 
 Modulus::Modulus() 
+    : BinaryOperator()
+{
+}
+
+Modulus::Modulus(NodePtr left, NodePtr right)
+    : BinaryOperator(std::move(left), std::move(right))
 {
 }
 

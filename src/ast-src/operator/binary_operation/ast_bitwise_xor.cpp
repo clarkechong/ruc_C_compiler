@@ -3,6 +3,12 @@
 namespace ast {
 
 BitwiseXor::BitwiseXor() 
+    : BinaryOperator()
+{
+}
+
+BitwiseXor::BitwiseXor(NodePtr left, NodePtr right)
+    : BinaryOperator(std::move(left), std::move(right))
 {
 }
 

@@ -12,6 +12,7 @@ namespace ast {
 class For : public Node 
 {
     public:
+        For();
         For(NodePtr initializer, NodePtr condition, NodePtr increment, NodePtr statement);
 
         virtual void EmitRISCV(std::ostream &stream, const std::string &dst_reg, Context &context) const override;

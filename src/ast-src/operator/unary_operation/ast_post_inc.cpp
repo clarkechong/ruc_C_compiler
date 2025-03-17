@@ -2,7 +2,13 @@
 
 namespace ast {
 
-PostInc::PostInc() 
+PostInc::PostInc()
+    : UnaryOperator()
+{
+}
+
+PostInc::PostInc(NodePtr operand)
+    : UnaryOperator(std::move(operand))
 {
 }
 

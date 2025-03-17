@@ -14,13 +14,10 @@ class GreaterThan : public BinaryOperator
 {
     public:
         GreaterThan();
+        GreaterThan(NodePtr left, NodePtr right);
 
         virtual void EmitRISCV(std::ostream &stream, const std::string &dst_reg, Context &context) const override;
         virtual void Print(std::ostream &stream, int indent) const override;
-
-
-    private:
-        ;
 };
 
 } // namespace ast

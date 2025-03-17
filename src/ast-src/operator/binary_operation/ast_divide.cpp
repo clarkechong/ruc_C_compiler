@@ -3,6 +3,12 @@
 namespace ast {
 
 Divide::Divide() 
+    : BinaryOperator()
+{
+}
+
+Divide::Divide(NodePtr left, NodePtr right)
+    : BinaryOperator(std::move(left), std::move(right))
 {
 }
 

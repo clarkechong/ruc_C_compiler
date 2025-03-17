@@ -3,6 +3,12 @@
 namespace ast {
 
 BitwiseAnd::BitwiseAnd() 
+    : BinaryOperator()
+{
+}
+
+BitwiseAnd::BitwiseAnd(NodePtr left, NodePtr right)
+    : BinaryOperator(std::move(left), std::move(right))
 {
 }
 

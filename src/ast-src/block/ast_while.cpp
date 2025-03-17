@@ -2,8 +2,15 @@
 
 namespace ast {
 
+While::While()
+: condition_(nullptr), statement_(nullptr)
+{
+}
+
 While::While(NodePtr condition, NodePtr statement)
-: condition_(std::move(condition)), statement_(std::move(statement)) {}
+: condition_(std::move(condition)), statement_(std::move(statement))
+{
+}
 
 void While::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context& context) const 
 {
