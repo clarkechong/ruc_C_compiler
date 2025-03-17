@@ -13,7 +13,7 @@ namespace ast {
 class String : public Node 
 {
     public:
-        String(std::string value) : value_(value) {};
+        String(std::string value);
 
         virtual void EmitRISCV(std::ostream &stream, const std::string &dst_reg, Context &context) const override;
         virtual void Print(std::ostream &stream, int indent) const override;

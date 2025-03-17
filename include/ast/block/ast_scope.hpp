@@ -12,8 +12,7 @@ namespace ast {
 class Scope : public Node 
 {
     public:
-        Scope(NodePtr declaration_list, NodePtr statement_list)
-        : declaration_list_(std::move(declaration_list)), statement_list_(std::move(statement_list)) {};
+        Scope(NodePtr declaration_list, NodePtr statement_list);
 
         virtual void EmitRISCV(std::ostream &stream, const std::string &dst_reg, Context &context) const override;
         virtual void Print(std::ostream &stream, int indent) const override;

@@ -2,6 +2,9 @@
 
 namespace ast {
 
+For::For(NodePtr initializer, NodePtr condition, NodePtr increment, NodePtr statement)
+: initializer_(std::move(initializer)), condition_(std::move(condition)), increment_(std::move(increment)), statement_(std::move(statement)) {}
+
 void For::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context& context) const 
 {
 }

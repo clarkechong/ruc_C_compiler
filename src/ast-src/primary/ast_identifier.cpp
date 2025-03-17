@@ -2,6 +2,8 @@
 
 namespace ast {
 
+Identifier::Identifier(std::string id) : id_(id) {}
+
 void Identifier::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context& context) const 
 {
 }

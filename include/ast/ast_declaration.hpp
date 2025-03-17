@@ -31,11 +31,9 @@ namespace ast {
 class Declaration : public Node 
 {
     public:
-        Declaration(NodePtr type, NodePtr declarator)
-        : type_(std::move(type)), declarator_(std::move(declarator)) {};
+        Declaration(NodePtr type, NodePtr declarator);
         
-        Declaration(NodePtr type, NodePtr declarator, NodePtr value)
-        : type_(std::move(type)), declarator_(std::move(declarator)), value_(std::move(value)) {};
+        Declaration(NodePtr type, NodePtr declarator, NodePtr value); // initializing constructor
 
         virtual void EmitRISCV(std::ostream &stream, const std::string &dst_reg, Context &context) const override;
         virtual void Print(std::ostream &stream, int indent) const override;
