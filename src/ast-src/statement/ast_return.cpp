@@ -19,7 +19,6 @@ void Return::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context
 void Return::Print(std::ostream& stream, indent_t indent) const 
 {
     stream << indent << "return";
-    
 
     if (expr_) {
         stream << " ";

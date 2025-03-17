@@ -1,4 +1,5 @@
 #include "ast/function/ast_function_declarator.hpp"
+#include "ast/ast_nodelist.hpp"
 
 namespace ast {
 
@@ -18,11 +19,17 @@ void FunctionDeclarator::EmitRISCV(std::ostream& stream, const std::string& dst_
 
 void FunctionDeclarator::Print(std::ostream& stream, indent_t indent) const 
 {
-    direct_declarator_->Print(stream, 0);
+    direct_declarator_->Print(stream, indent_t(0));
     stream << "(";
     if (parameter_list_)
     {
-        parameter_list_->Print(stream, 0);
+        // Cast to NodeList and use PrintParameters
+        NodeList* params = dynamic_cast<NodeList*>(parameter_list_.get());
+        if (params) {
+            params->PrintParameters(stream);
+        } else {
+            parameter_list_->Print(stream, indent_t(0));
+        }
     }
     stream << ")";
 }
