@@ -70,7 +70,7 @@ ROOT
 
 translation_unit
 	: external_declaration 						{ $$ = new NodeList(NodePtr($1)); }
-	| translation_unit external_declaration 	{ $1->Push(NodePtr($2)); $$ = $1; }
+	| translation_unit external_declaration 	{ $1->Push(NodePtr($2)); $$ = std::move($1); }
 	;
 
 external_declaration
@@ -107,14 +107,14 @@ postfix_expression
 
 argument_expression_list
 	: assignment_expression									{ $$ = new NodeList(NodePtr($1)); }
-	| argument_expression_list ',' assignment_expression	{ $1->Push(NodePtr($3)); $$ = $1; }
+	| argument_expression_list ',' assignment_expression	{ $1->Push(NodePtr($3)); $$ = std::move($1); }
 	;
 
 unary_expression
 	: postfix_expression				{ $$ = std::move($1); }
 	| INC_OP unary_expression			{ $$ = new PostInc(NodePtr($2)); }
 	| DEC_OP unary_expression			{ $$ = new PostDec(NodePtr($2)); }
-	| unary_operator unary_expression	{ if ($1) { ((UnaryOperator*)$1)->SetOperand(NodePtr($2)); $$ = $1; } else { $$ = $2; } }
+	| unary_operator unary_expression	{ if ($1) { ((UnaryOperator*)$1)->SetOperand(NodePtr($2)); $$ = std::move($1); } else { $$ = std::move($2); } }
 	| SIZEOF unary_expression			{ $$ = new SizeOf(NodePtr($2)); }
 	| SIZEOF '(' type_name ')'			{ $$ = new SizeOf(NodePtr($3)); }
 	;
@@ -275,7 +275,7 @@ struct_specifier
 
 struct_declaration_list
 	: struct_declaration									{ $$ = new NodeList(NodePtr($1)); }
-	| struct_declaration_list struct_declaration			{ $1->Push(NodePtr($2)); $$ = $1; }
+	| struct_declaration_list struct_declaration			{ $1->Push(NodePtr($2)); $$ = std::move($1); }
 	;
 
 struct_declaration
@@ -289,7 +289,7 @@ specifier_qualifier_list
 
 struct_declarator_list
 	: struct_declarator										{ $$ = new NodeList(NodePtr($1)); }
-	| struct_declarator_list ',' struct_declarator			{ $1->Push(NodePtr($3)); $$ = $1; }
+	| struct_declarator_list ',' struct_declarator			{ $1->Push(NodePtr($3)); $$ = std::move($1); }
 	;
 
 struct_declarator
@@ -306,7 +306,7 @@ enum_specifier
 
 enumerator_list
 	: enumerator						{ $$ = new NodeList(NodePtr($1)); }
-	| enumerator_list ',' enumerator	{ $1->Push(NodePtr($3)); $$ = $1; }
+	| enumerator_list ',' enumerator	{ $1->Push(NodePtr($3)); $$ = std::move($1); }
 	;
 
 enumerator
@@ -354,7 +354,7 @@ pointer
 
 parameter_list
 	: parameter_declaration								{ $$ = new NodeList(NodePtr($1)); }
-	| parameter_list ',' parameter_declaration			{ $1->Push(NodePtr($3)); $$ = $1; }
+	| parameter_list ',' parameter_declaration			{ $1->Push(NodePtr($3)); $$ = std::move($1); }
 	;
 
 parameter_declaration
@@ -400,7 +400,7 @@ initializer
 
 initializer_list
 	: initializer						{ $$ = new NodeList(NodePtr($1)); }
-	| initializer_list ',' initializer	{ $1->Push(NodePtr($3)); $$ = $1; }
+	| initializer_list ',' initializer	{ $1->Push(NodePtr($3)); $$ = std::move($1); }
 	;
 
 statement
@@ -427,12 +427,12 @@ compound_statement // compound statement = block = scope
 
 declaration_list
 	: declaration					{ $$ = new NodeList(NodePtr($1)); }
-	| declaration_list declaration	{ $1->Push(NodePtr($2)); $$ = $1; }
+	| declaration_list declaration	{ $1->Push(NodePtr($2)); $$ = std::move($1); }
 	;
 
 statement_list
 	: statement						{ $$ = new NodeList(NodePtr($1)); }
-	| statement_list statement		{ $1->Push(NodePtr($2)); $$ = $1; }
+	| statement_list statement		{ $1->Push(NodePtr($2)); $$ = std::move($1); }
 	;
 
 expression_statement
