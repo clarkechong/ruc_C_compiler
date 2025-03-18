@@ -247,7 +247,7 @@ declaration_specifiers // only considering single types
 
 init_declarator
 	: declarator					{ $$ = $1; }
-	| declarator '=' initializer	{ /* Add initializer to declarator */ }
+	| declarator '=' initializer	{ $$ = new InitDeclarator(NodePtr($1), NodePtr($3)); }
 	;
 
 // storage_class_specifier

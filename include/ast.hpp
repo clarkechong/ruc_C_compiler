@@ -10,6 +10,7 @@
 #include "ast/ast_context.hpp"
 #include "ast/ast_declaration.hpp"
 #include "ast/ast_declarator.hpp"
+#include "ast/ast_init_declarator.hpp"
 #include "ast/ast_node.hpp"
 #include "ast/ast_nodelist.hpp"
 
