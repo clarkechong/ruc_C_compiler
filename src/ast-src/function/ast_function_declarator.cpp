@@ -17,6 +17,15 @@ void FunctionDeclarator::EmitRISCV(std::ostream& stream, const std::string& dst_
 {
     std::string func_name = GetID();
     
+    TypeSpecifier return_type = TypeSpecifier::INT;
+    
+    std::vector<TypeSpecifier> param_types;
+    if (parameter_list_) {
+        param_types.push_back(TypeSpecifier::INT); // in future implement parameter_declaration node type, which can extract typespecifier from parameters
+    }
+    
+    context.scope_manager.AddFunction(func_name, return_type, param_types);
+    
     stream << func_name << ":\n";
     
     context.stack_manager.InitiateFrame(stream);

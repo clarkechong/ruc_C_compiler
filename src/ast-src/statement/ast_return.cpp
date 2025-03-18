@@ -14,14 +14,10 @@ Return::Return(NodePtr expr)
 
 void Return::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context& context) const 
 {
-    std::string return_reg;
-    
     if (expr_) {
-        bool is_float = false; 
-        
-        return_reg = context.register_manager.AllocateReturnRegister(is_float);
-        
-        expr_->EmitRISCV(stream, return_reg, context);
+        expr_->EmitRISCV(stream, "a0", context);
+    } else {
+        stream << "    li a0, 0\n"; // if no return value, set a0 to 0
     }
     
     std::string end_label = context.label_manager.GetCurrentFunctionEndLabel();
@@ -34,7 +30,7 @@ void Return::Print(std::ostream& stream, indent_t indent) const
     
     if (expr_) {
         stream << " ";
-        expr_->Print(stream, indent_t(0)); // no indentation for expression in return
+        expr_->Print(stream, indent_t(0));
     }
     
     stream << ";\n";

@@ -43,6 +43,7 @@ void FunctionDefinition::EmitRISCV(std::ostream& stream, const std::string& dst_
         compound_statement_->EmitRISCV(stream, dst_reg, context);
     }
     
+    // Function epilogue is where all return statements jump to
     stream << end_label << ":\n";
     context.stack_manager.TerminateFrame(stream);
     stream << "    ret\n\n";

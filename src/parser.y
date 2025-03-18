@@ -300,8 +300,8 @@ struct_declarator_list
 
 struct_declarator
 	: declarator											{ $$ = $1; }
-	| ':' constant_expression								{ /* Bit field */ }
-	| declarator ':' constant_expression					{ /* Named bit field */ }
+	| ':' constant_expression								{ } // ignore
+	| declarator ':' constant_expression					{ } // ignore
 	;
 
 enum_specifier

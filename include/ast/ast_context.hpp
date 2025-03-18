@@ -59,6 +59,8 @@ public:
     void EnterNewScope();
     void ExitScope(std::ostream& dst);
     
+    bool InGlobalScope() const;
+    
     void AddVariable(const std::string& name, TypeSpecifier type, int stack_offset);
     void AddArray(const std::string& name, TypeSpecifier type, const std::vector<int>& dimensions, int stack_offset);
     void AddPointer(const std::string& name, TypeSpecifier type, int stack_offset);
@@ -92,6 +94,7 @@ public:
     ~StackManager();
     
     int AllocateStackSpace(int bytes);
+    void AllocateStackSpace(std::ostream& dst, int bytes);
     void InitiateFrame(std::ostream& dst);
     void TerminateFrame(std::ostream& dst);
 

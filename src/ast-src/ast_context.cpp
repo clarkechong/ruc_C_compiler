@@ -107,6 +107,10 @@ void ScopeManager::ExitScope(std::ostream& dst) {
     }
 }
 
+bool ScopeManager::InGlobalScope() const {
+    return variable_scopes_.size() == 1;
+}
+
 void ScopeManager::AddVariable(const std::string& name, TypeSpecifier type, int stack_offset) {
     Variable_s var;
     var.type = type;
@@ -224,6 +228,12 @@ int StackManager::AllocateStackSpace(int bytes) {
     return stack_offset_;
 }
 
+void StackManager::AllocateStackSpace(std::ostream& dst, int bytes) {
+    int aligned_size = (bytes + min_alignment_ - 1) & ~(min_alignment_ - 1);
+    stack_offset_ -= aligned_size;
+    dst << "    addi sp, sp, -" << aligned_size << std::endl;
+}
+
 void StackManager::InitiateFrame(std::ostream& dst) {
     int ra_location = (default_stack_size_ - 4);
     int s0_location = ra_location - 4;
@@ -267,7 +277,6 @@ std::string LabelManager::CreateLabel(const std::string& prefix) {
     return "." + prefix + "_" + std::to_string(++label_counter_);
 }
 
-// Function context tracking
 void LabelManager::PushFunctionContext(const std::string& func_name) {
     function_stack_.push(func_name);
     function_end_labels_.push(func_name + "_end");

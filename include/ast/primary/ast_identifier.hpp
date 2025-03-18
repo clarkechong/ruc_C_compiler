@@ -18,6 +18,9 @@ class Identifier : public Declarator
         virtual void EmitRISCV(std::ostream &stream, const std::string &dst_reg, Context &context) const override;
         virtual void Print(std::ostream &stream, indent_t indent) const override;
         virtual std::string GetID() const override;
+        
+        // Add GetName to match GetID for function call use
+        std::string GetName() const { return id_; }
 
     private:
         std::string id_;

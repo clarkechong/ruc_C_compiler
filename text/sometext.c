@@ -6,13 +6,7 @@
 //     return hello;   // identifier
 // }
 
-// int ggg() {
-//     return 5;
-// }
-
-int g(){}
-
-int f()
-{
-    return g();
+int ggg() {
+    return 5;
 }
+

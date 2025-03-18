@@ -19,6 +19,9 @@ class NodeList : public Node
 
         virtual void Push(NodePtr node);
         virtual int GetNodeCount() const;
+        
+        // Add GetChildren for function call arguments
+        const std::vector<NodePtr>& GetChildren() const { return nodes_; }
 
     private:
         std::vector<NodePtr> nodes_;
