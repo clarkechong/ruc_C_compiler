@@ -65,8 +65,12 @@ translation_unit
 
 external_declaration
 	: function_definition { $$ = $1; }
-	| declaration_specifiers declarator '(' ')' ';' {
-		$$ = new Externdef($1,NodePtr($2));
+	| declaration {$$ = $1;}
+	| declaration_specifiers declarator declaration_list ';' {
+		$$ = new Externdef($1, NodePtr($2), NodePtr($3));
+	}
+	| declaration_specifiers declarator ';' {
+		$$ = new Externdef($1,NodePtr($2), nullptr);
 	}
 	;
 
@@ -99,6 +103,8 @@ declaration
 		delete $2;
 	}
 	;
+
+
 
 declaration_list
 	: declaration{
@@ -208,7 +214,7 @@ postfix_expression
     | postfix_expression '(' ')' {
         $$ = new Funcprim(NodePtr($1),nullptr);
     }
-    | postfix_expression '(' argument_expression_list  ')'{
+    | postfix_expression '(' argument_expression_list ')' {
         $$ = new Funcprim(NodePtr($1),NodePtr($3));
     }
 	;

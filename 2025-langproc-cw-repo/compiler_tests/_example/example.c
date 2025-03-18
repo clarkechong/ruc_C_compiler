@@ -1,7 +1,6 @@
-int g(int a, int b, int c, int d, int e)
-{
-    return a+b+c+d+e;
-}
+int x;
+int y;
+int g();
 
 int f()
 {

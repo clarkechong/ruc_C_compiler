@@ -15,9 +15,10 @@ class Externdef : public Node
 private:
     TypeSpecifier type_;
     NodePtr identifier_;
+    NodePtr parameter_list_;
 
 public:
-    Externdef(TypeSpecifier type, NodePtr identifier) : type_(type), identifier_(std::move(identifier)){};
+    Externdef(TypeSpecifier type, NodePtr identifier, NodePtr parameter_list) : type_(type), identifier_(std::move(identifier)), parameter_list_(std::move(parameter_list)){};
     void EmitRISC(std::ostream& stream, Context& context) const override;
     void Print(std::ostream& stream) const override;
 

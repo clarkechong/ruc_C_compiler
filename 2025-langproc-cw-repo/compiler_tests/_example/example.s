@@ -1,59 +1,22 @@
-.text
-.globl g 
-g:
-addi    sp,sp,-100
-sw      ra,96(sp)
-sw      s0,92(sp)
-addi    s0,sp,100
-sw       a0,-20(s0)
-sw       a1,-24(s0)
-sw       a2,-28(s0)
-sw       a3,-32(s0)
-sw       a4,-36(s0)
-sw       a5,-40(s0)
-sw       a6,-44(s0)
-sw       a7,-48(s0)
-lw      a5,-20(s0)
-add      a4,a5,0
-lw      a5,-24(s0)
-add      a4,a5,0
-lw      a5,-28(s0)
-add      a4,a5,0
-lw      a5,-32(s0)
-add      a4,a5,0
-lw      a5,-36(s0)
-add      a4,a5,0
-lw      a5,-40(s0)
-add      a4,a5,0
-lw      a5,-44(s0)
-add      a4,a5,0
-lw      a5,-48(s0)
-add      a4,a5,0
-lw      a5,-52(s0)
-add      a4,a5,0
-lw      a5,-56(s0)
-add     a5,a4,a5
-add     a5,a4,a5
-add     a5,a4,a5
-add     a5,a4,a5
-add     a5,a4,a5
-add     a5,a4,a5
-add     a5,a4,a5
-add     a5,a4,a5
-add     a5,a4,a5
-mv      a0,a5
-lw      ra,96(sp)
-lw      s0,92(sp)
-addi    sp,sp,100
-jr      ra
-.text
+   .text
 .globl f 
 f:
 addi    sp,sp,-100
 sw      ra,96(sp)
 sw      s0,92(sp)
 addi    s0,sp,100
+li      a5, 1
+mv       a0,a5 
+li      a5, 2
+mv       a1,a5 
+li      a5, 3
+mv       a2,a5 
+li      a5, 4
+mv       a3,a5 
+li      a5, 5
+mv       a4,a5 
 call    g
+mv      a5,a0
 mv      a0,a5
 lw      ra,96(sp)
 lw      s0,92(sp)

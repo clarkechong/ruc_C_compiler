@@ -10,9 +10,8 @@ void Argdecl::EmitRISC(std::ostream& stream, Context& context) const
 
     int argie = context.Argreg();
     if(argie < 8){
-        stream << "li       a" << argie << ", " ;
-        expression_->Print(stream);
-        stream << " " << std::endl;
+        expression_->EmitRISC(stream,context);
+        stream << "mv       a" << argie << ",a5 " <<std::endl;
     }
     else{
         stream << "how did we get here" <<std::endl;
