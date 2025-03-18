@@ -88,6 +88,10 @@ std::string Context::GetStoreInstruction(TypeSpecifier type) {
 // ScopeManager Implementation
 //=============================================================================
 
+ScopeManager::ScopeManager(Context* context) : context_(context) {
+    variable_scopes_.push_back(std::unordered_map<std::string, Variable_s>());
+}
+
 ScopeManager::~ScopeManager() {
 }
 
@@ -208,6 +212,9 @@ bool ScopeManager::StructExists(const std::string& name) const {
 // StackManager Implementation
 //=============================================================================
 
+StackManager::StackManager(Context* context) : context_(context) {
+}
+
 StackManager::~StackManager() {
 }
 
@@ -250,6 +257,9 @@ void StackManager::ResetStackPointer() {
 // LabelManager Implementation
 //=============================================================================
 
+LabelManager::LabelManager(Context* context) : context_(context) {
+}
+
 LabelManager::~LabelManager() {
 }
 
@@ -257,6 +267,36 @@ std::string LabelManager::CreateLabel(const std::string& prefix) {
     return "." + prefix + "_" + std::to_string(++label_counter_);
 }
 
+// Function context tracking
+void LabelManager::PushFunctionContext(const std::string& func_name) {
+    function_stack_.push(func_name);
+    function_end_labels_.push(func_name + "_end");
+}
+
+void LabelManager::PopFunctionContext() {
+    if (!function_stack_.empty()) {
+        function_stack_.pop();
+        function_end_labels_.pop();
+    } else {
+        throw std::runtime_error("No function context to pop");
+    }
+}
+
+std::string LabelManager::GetCurrentFunction() const {
+    if (function_stack_.empty()) {
+        throw std::runtime_error("Not in a function context");
+    }
+    return function_stack_.top();
+}
+
+std::string LabelManager::GetCurrentFunctionEndLabel() const {
+    if (function_end_labels_.empty()) {
+        throw std::runtime_error("Not in a function context");
+    }
+    return function_end_labels_.top();
+}
+
+// Loop label management
 std::string LabelManager::GetCurrentLoopStart() const {
     if (!loop_start_labels_.empty()) {
         return loop_start_labels_.back();
@@ -336,6 +376,19 @@ void LabelManager::EmitDataSection(std::ostream& dst) const {
 //=============================================================================
 // RegisterManager Implementation
 //=============================================================================
+
+RegisterManager::RegisterManager(Context* context) : context_(context) {
+    // Reserve registers that shouldn't be allocated
+    regs_[0] = 1; // x0 is hardwired to zero
+    regs_[1] = 1; // x1 (ra) is return address
+    regs_[2] = 1; // x2 (sp) is stack pointer
+    regs_[3] = 1; // x3 (gp) is global pointer
+    regs_[4] = 1; // x4 (tp) is thread pointer
+    
+    // f0-f1 are reserved for return values
+    regs_float_[0] = 1;
+    regs_float_[1] = 1;
+}
 
 RegisterManager::~RegisterManager() {
 }

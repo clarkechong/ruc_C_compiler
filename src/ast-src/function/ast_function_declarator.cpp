@@ -1,4 +1,5 @@
 #include "ast/function/ast_function_declarator.hpp"
+#include "ast/ast_declarator.hpp"
 
 namespace ast {
 
@@ -14,11 +15,30 @@ FunctionDeclarator::FunctionDeclarator(NodePtr direct_declarator, NodePtr parame
 
 void FunctionDeclarator::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context& context) const 
 {
+    std::string func_name = GetID();
+    
+    stream << func_name << ":\n";
+    
+    context.stack_manager.InitiateFrame(stream);
+    
+    if (parameter_list_) {
+        parameter_list_->EmitRISCV(stream, dst_reg, context);
+    }
 }
 
 void FunctionDeclarator::Print(std::ostream& stream, indent_t indent) const 
 {
-    std::cout<<indent<<"fdsjkflsd"; //HERE
+    if (direct_declarator_) {
+        direct_declarator_->Print(stream, indent);
+    }
+    
+    stream << "(";
+    
+    if (parameter_list_) {
+        parameter_list_->Print(stream, indent);
+    }
+    
+    stream << ")";
 }
 
 std::string FunctionDeclarator::GetID() const 

@@ -13,7 +13,12 @@
 
 int main(int argc, char** argv) {
 
-    ParseAST(argv[1])->Print(std::cout, 0);
+    ast::Context context;
+
+    auto root = ParseAST(argv[1]);
+    root->EmitRISCV(std::cout, "a0", context);
+    std::cout<<"\n\n\n";
+    root->Print(std::cout, 0);
 
     return 0;
     

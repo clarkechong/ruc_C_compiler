@@ -6,6 +6,7 @@
 #include <string>
 #include <unordered_map>
 #include <map>
+#include <stack>
 #include "type/ast_type_specifier.hpp"
 
 class indent_t {
@@ -52,7 +53,7 @@ class Context;
 class ScopeManager 
 {
 public:
-    ScopeManager(Context* context) : context_(context) {};
+    ScopeManager(Context* context);
     ~ScopeManager();
     
     void EnterNewScope();
@@ -87,7 +88,7 @@ private:
 class StackManager 
 {
 public:
-    StackManager(Context* context) : context_(context) {};
+    StackManager(Context* context);
     ~StackManager();
     
     int AllocateStackSpace(int bytes);
@@ -112,23 +113,29 @@ private:
 class LabelManager 
 {
 public:
-    LabelManager(Context* context) : context_(context) {};
+    LabelManager(Context* context);
     ~LabelManager();
     
     std::string CreateLabel(const std::string& prefix);
     
+    // current function tracking
+    void PushFunctionContext(const std::string& func_name);
+    void PopFunctionContext();
+    std::string GetCurrentFunction() const;
+    std::string GetCurrentFunctionEndLabel() const;
+    
+    // loop label management
     std::string GetCurrentLoopStart() const;
     std::string GetCurrentLoopEnd() const;
     std::string GetCurrentLoopUpdate() const;
-
     void PushLoopStart(const std::string& label);
     void PushLoopEnd(const std::string& label);
     void PushLoopUpdate(const std::string& label);
-
     void PopLoopStart();
     void PopLoopEnd();
     void PopLoopUpdate();
     
+    // string literal management
     std::string AddStringLiteral(const std::string& value);
     void EmitDataSection(std::ostream& dst) const;
 
@@ -137,17 +144,23 @@ private:
     
     int label_counter_ = 0;
     
+    // track current function context for returns
+    std::stack<std::string> function_stack_;
+    std::stack<std::string> function_end_labels_;
+    
+    // loop label stacks
     std::vector<std::string> loop_start_labels_;
     std::vector<std::string> loop_end_labels_;
     std::vector<std::string> loop_update_labels_;
     
+    // string literals for .data section
     std::vector<std::pair<std::string, std::string>> string_literals_;
 };
 
 class RegisterManager 
 {
 public:
-    RegisterManager(Context* context) : context_(context) {};
+    RegisterManager(Context* context);
     ~RegisterManager();
     
     std::string AllocateRegister(bool is_float = false);
