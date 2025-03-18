@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <unordered_map>
+#include <map>
 #include "type/ast_type_specifier.hpp"
 
 class indent_t {
@@ -21,6 +22,10 @@ class indent_t {
         indent_t& operator++(int) {
             ++level_;
             return *this;
+        }
+        
+        int GetLevel() const {
+            return level_;
         }
     
     private:
@@ -40,104 +45,157 @@ struct Variable_s {
 struct Function_s {
     TypeSpecifier return_type;
     std::vector<TypeSpecifier> param_types;
-    bool is_defined = false;
 };
 
+class Context;
+
+class ScopeManager 
+{
+public:
+    ScopeManager(Context* context) : context_(context) {};
+    ~ScopeManager();
+    
+    void EnterNewScope();
+    void ExitScope(std::ostream& dst);
+    
+    void AddVariable(const std::string& name, TypeSpecifier type, int stack_offset);
+    void AddArray(const std::string& name, TypeSpecifier type, const std::vector<int>& dimensions, int stack_offset);
+    void AddPointer(const std::string& name, TypeSpecifier type, int stack_offset);
+    void AddFunction(const std::string& name, TypeSpecifier return_type, const std::vector<TypeSpecifier>& param_types);
+    void AddEnum(const std::string& enum_name);
+    void AddEnumValue(const std::string& enum_name, const std::string& value_name, int value);
+    void AddStruct(const std::string& name, const std::map<std::string, TypeSpecifier>& members, int size);
+    
+    int GetEnumValue(const std::string& enum_name, const std::string& value_name) const;
+    Variable_s GetVariable(const std::string& name) const;
+    Function_s GetFunction(const std::string& name) const;
+    
+    bool VariableExists(const std::string& name) const;
+    bool FunctionExists(const std::string& name) const;
+    bool StructExists(const std::string& name) const;
+
+private:
+    Context* context_;
+    
+    std::vector<std::unordered_map<std::string, Variable_s>> variable_scopes_;
+    std::vector<std::unordered_map<std::string, std::map<std::string, Variable_s>>> struct_table_;
+
+    std::unordered_map<std::string, Function_s> function_table_;
+    std::unordered_map<std::string, std::map<std::string, int>> enum_table_;
+};
+
+class StackManager 
+{
+public:
+    StackManager(Context* context) : context_(context) {};
+    ~StackManager();
+    
+    int AllocateStackSpace(int bytes);
+    void InitiateFrame(std::ostream& dst);
+    void TerminateFrame(std::ostream& dst);
+
+    void ResetFramePointer();
+    void ResetStackPointer();
+    
+    int GetStackOffset() const { return stack_offset_; }
+    int GetMinAlignment() const { return min_alignment_; }
+
+private:
+    Context* context_;
+    
+    int stack_offset_ = 0;
+    int frame_pointer_offset_ = 0;
+    int default_stack_size_ = 512;
+    int min_alignment_ = 4;
+};
+
+class LabelManager 
+{
+public:
+    LabelManager(Context* context) : context_(context) {};
+    ~LabelManager();
+    
+    std::string CreateLabel(const std::string& prefix);
+    
+    std::string GetCurrentLoopStart() const;
+    std::string GetCurrentLoopEnd() const;
+    std::string GetCurrentLoopUpdate() const;
+
+    void PushLoopStart(const std::string& label);
+    void PushLoopEnd(const std::string& label);
+    void PushLoopUpdate(const std::string& label);
+
+    void PopLoopStart();
+    void PopLoopEnd();
+    void PopLoopUpdate();
+    
+    std::string AddStringLiteral(const std::string& value);
+    void EmitDataSection(std::ostream& dst) const;
+
+private:
+    Context* context_;
+    
+    int label_counter_ = 0;
+    
+    std::vector<std::string> loop_start_labels_;
+    std::vector<std::string> loop_end_labels_;
+    std::vector<std::string> loop_update_labels_;
+    
+    std::vector<std::pair<std::string, std::string>> string_literals_;
+};
+
+class RegisterManager 
+{
+public:
+    RegisterManager(Context* context) : context_(context) {};
+    ~RegisterManager();
+    
+    std::string AllocateRegister(bool is_float = false);
+    std::string AllocateReturnRegister(bool is_float = false);
+    std::string AllocateArgumentRegister(int arg_num, bool is_float = false);
+
+    void DeallocateRegister(const std::string& reg);
+    void SpillRegister(const std::string& reg, std::ostream& dst);
+    void UnspillRegister(const std::string& reg, std::ostream& dst);
+    void PushRegisters(std::ostream& dst);
+    void RestoreRegisters(std::ostream& dst);
+    void ResetRegisters();
+
+private:
+    Context* context_;
+    
+    int regs_[32] = {0};          // Integer registers (x0-x31)
+    int regs_float_[32] = {0};    // Floating-point registers (f0-f31)
+    
+    struct SpilledRegister {
+        std::string reg_name;
+        int stack_offset;
+        bool is_float;
+    };
+    std::vector<SpilledRegister> spilled_registers_;
+    
+    struct SavedRegister {
+        std::string reg_name;
+        int stack_offset;
+        bool is_float;
+    };
+    std::vector<SavedRegister> saved_registers_;
+};
 
 class Context 
 {
 public:
     Context();
     ~Context();
-
-    // Register allocation
-    std::string AllocateRegister(bool is_float = false);
-    void FreeRegister(const std::string& reg);
     
-    // Memory management
-    void EnterScope();
-    void ExitScope(std::ostream& dst);
-    int AllocateStackSpace(int size);
-    
-    // Symbol table operations
-    void AddVariable(const std::string& name, TypeSpecifier type);
-    void AddArray(const std::string& name, TypeSpecifier type, const std::vector<int>& dimensions);
-    void AddPointer(const std::string& name, TypeSpecifier type);
-    void AddFunction(const std::string& name, TypeSpecifier return_type, const std::vector<TypeSpecifier>& param_types);
-    void AddEnumValue(const std::string& name, int value);
-    
-    // Variable and function lookup
-    int GetEnumValue(const std::string& name) const;
-    Variable_s GetVariable(const std::string& name) const;
-    Function_s GetFunction(const std::string& name) const;
-    bool VariableExists(const std::string& name) const;
-    bool FunctionExists(const std::string& name) const;
-    
-    // Control flow management
-    void PushLoopLabels(const std::string& start, const std::string& end, const std::string& update = "");
-    void PopLoopLabels();
-    std::string GetCurrentLoopStart() const;
-    std::string GetCurrentLoopEnd() const;
-    std::string GetCurrentLoopUpdate() const;
-    
-    // Label generation
-    std::string CreateLabel(const std::string& prefix);
-    
-    // String literal management
-    std::string AddStringLiteral(const std::string& value);
-    void EmitDataSection(std::ostream& dst) const;
-    
-    // Type utility functions
     static int GetSizeOfType(TypeSpecifier type);
     static std::string GetLoadInstruction(TypeSpecifier type);
     static std::string GetStoreInstruction(TypeSpecifier type);
 
-private:
-    // Register allocation
-    int regs_[32] = {
-        1,                                  // x0:          zero - Zero register
-        1,                                  // x1:          ra - Return address
-        1,                                  // x2:          sp - Stack pointer
-        1,                                  // x3:          gp - Global pointer
-        1,                                  // x4:          tp - Thread pointer
-        0, 0, 0,                            // x5-x7:       t0-t2 - Temporaries
-        1, 1,                               // x8-x9:       s0-s1 - Saved registers
-        0, 0, 0, 0, 0, 0, 0, 0,             // x10-x17:     a0-a7 - Function arguments
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,       // x18-x27:     s2-s11 - Saved registers
-        0, 0, 0, 0                          // x28-x31:     t3-t6 - Temporaries
-    };
-
-    // Floating-point register allocation
-    int regs_float_[32] = {
-        0, 0,                               // f0-f1:       ft0-ft1 - Temporaries
-        0, 0, 0, 0, 0, 0,                   // f2-f7:       ft2-ft7 - Temporaries
-        1, 1,                               // f8-f9:       fs0-fs1 - Saved registers
-        0, 0,                               // f10-f11:     fa0-fa1 - Function args/return
-        0, 0, 0, 0, 0, 0,                   // f12-f17:     fa2-fa7 - Function arguments
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,       // f18-f27:     fs2-fs11 - Saved registers
-        0, 0, 0, 0                          // f28-f31:     ft8-ft11 - Temporaries
-    };
-
-    // Label generation
-    int label_counter_ = 0;
-
-    // Memory management
-    int stack_offset_ = 0;
-    int default_stack_size_ = 128;
-    int min_alignment_ = 4;
-
-    // Symbol tables
-    std::vector<std::unordered_map<std::string, Variable_s>> variable_scopes_;
-    std::unordered_map<std::string, Function_s> function_table_;
-    std::unordered_map<std::string, int> enum_values_;
-
-    // Control flow state
-    std::vector<std::string> loop_start_labels_;
-    std::vector<std::string> loop_end_labels_;
-    std::vector<std::string> loop_update_labels_;
-
-    // String literals
-    std::vector<std::pair<std::string, std::string>> string_literals_;
+    ScopeManager        scope_manager;
+    StackManager        stack_manager;
+    LabelManager        label_manager;
+    RegisterManager     register_manager;
 };
 
-} // namespace ast
+}
