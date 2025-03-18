@@ -6,6 +6,7 @@
 
 #include "ast/ast_node.hpp"
 #include "ast/ast_context.hpp"
+#include "ast/function/ast_function_declarator.hpp"
 
 namespace ast {
 

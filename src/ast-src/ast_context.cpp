@@ -5,310 +5,200 @@
 
 namespace ast {
 
-Context::Context() {
-    // Initialize the first (global) scope
-    variable_scopes_.push_back(std::unordered_map<std::string, Variable_s>());
+Context::Context()
+{
 }
 
-Context::~Context() {
+Context::~Context()
+{
 }
 
-// Register allocation
-std::string Context::AllocateRegister(bool is_float) {
-    if (is_float) {
-        // Allocate a floating-point register
-        for (int i = 0; i < 32; i++) {
-            if (regs_float_[i] == 0) {
-                regs_float_[i] = 1;
-                return "f" + std::to_string(i);
-            }
-        }
-    } else {
-        // Allocate an integer register
-        for (int i = 5; i < 32; i++) {
-            if (regs_[i] == 0) {
-                regs_[i] = 1;
-                return "x" + std::to_string(i);
-            }
-        }
-    }
-    
-    // No registers available
-    throw std::runtime_error("No available registers");
+// Register allocation and management
+std::string Context::AllocateRegister(bool is_float)
+{
+    return "";
 }
 
-void Context::FreeRegister(const std::string& reg) {
-    if (reg.empty()) return;
-    
-    if (reg[0] == 'f') {
-        // Free floating-point register
-        int reg_num = std::stoi(reg.substr(1));
-        if (reg_num >= 0 && reg_num < 32) {
-            regs_float_[reg_num] = 0;
-        }
-    } else if (reg[0] == 'x') {
-        // Free integer register
-        int reg_num = std::stoi(reg.substr(1));
-        if (reg_num >= 5 && reg_num < 32) {
-            regs_[reg_num] = 0;
-        }
-    }
+std::string Context::ReturnRegister(bool is_float)
+{
+    return "";
 }
 
-// Memory management
-void Context::EnterScope() {
-    // Push a new scope onto the stack
-    variable_scopes_.push_back(std::unordered_map<std::string, Variable_s>());
-    
+std::string Context::ArgRegister(int arg_num, bool is_float)
+{
+    return "";
 }
 
-void Context::ExitScope(std::ostream& dst) {
-    // Pop the current scope
-    if (variable_scopes_.size() > 1) {
-        variable_scopes_.pop_back();
-    } else {
-        throw std::runtime_error("Cannot exit global scope");
-    }
-    
+void Context::DeallocateRegister(const std::string& reg)
+{
 }
 
-int Context::AllocateStackSpace(int size) {
-    // Align the size to maintain stack alignment
-    int aligned_size = (size + min_alignment_ - 1) & ~(min_alignment_ - 1);
-    stack_offset_ -= aligned_size;
-    return stack_offset_;
+void Context::SpillRegister(const std::string& reg, std::ostream& dst)
+{
+}
+
+void Context::UnspillRegister(const std::string& reg, std::ostream& dst)
+{
+}
+
+void Context::PushRegisters(std::ostream& dst)
+{
+}
+
+void Context::RestoreRegisters(std::ostream& dst)
+{
+}
+
+void Context::ResetRegisters()
+{
+}
+
+// Stack and frame management
+int Context::AllocateStackSpace(int bytes)
+{
+    return 0;
+}
+
+void Context::InitiateFrame(std::ostream& dst)
+{
+}
+
+void Context::TerminateFrame(std::ostream& dst)
+{
+}
+
+int Context::CalculateStackSize()
+{
+    return 0;
+}
+
+void Context::ResetFramePointer()
+{
+}
+
+void Context::ResetStackPointer()
+{
+}
+
+// Scope management
+void Context::EnterScope()
+{
+}
+
+void Context::ExitScope(std::ostream& dst)
+{
 }
 
 // Symbol table operations
-void Context::AddVariable(const std::string& name, TypeSpecifier type) {
-    Variable_s var;
-    var.type = type;
-    var.stack_offset = AllocateStackSpace(GetSizeOfType(type));
-    
-    // Add to current scope
-    variable_scopes_.back()[name] = var;
+void Context::AddVariable(const std::string& name, TypeSpecifier type)
+{
 }
 
-void Context::AddArray(const std::string& name, TypeSpecifier type, const std::vector<int>& dimensions) {
-    Variable_s var;
-    var.type = type;
-    var.is_array = true;
-    var.array_dimensions = dimensions;
-    
-    // Calculate total size
-    int total_size = GetSizeOfType(type);
-    for (int dim : dimensions) {
-        total_size *= dim;
-    }
-    
-    var.stack_offset = AllocateStackSpace(total_size);
-    
-    // Add to current scope
-    variable_scopes_.back()[name] = var;
+void Context::AddArray(const std::string& name, TypeSpecifier type, const std::vector<int>& dimensions)
+{
 }
 
-void Context::AddPointer(const std::string& name, TypeSpecifier type) {
-    Variable_s var;
-    var.type = type;
-    var.is_pointer = true;
-    var.stack_offset = AllocateStackSpace(4); // Pointers are 4 bytes on 32-bit systems
-    
-    // Add to current scope
-    variable_scopes_.back()[name] = var;
+void Context::AddPointer(const std::string& name, TypeSpecifier type)
+{
 }
 
-void Context::AddFunction(const std::string& name, TypeSpecifier return_type, const std::vector<TypeSpecifier>& param_types) {
-    Function_s func;
-    func.return_type = return_type;
-    func.param_types = param_types;
-    
-    function_table_[name] = func;
+void Context::AddFunction(const std::string& name, TypeSpecifier return_type, const std::vector<TypeSpecifier>& param_types)
+{
 }
 
-void Context::AddEnumValue(const std::string& name, int value) {
-    // For unscoped enums, we simply map the name directly to its integer value
-    enum_values_[name] = value;
+void Context::AddEnum(const std::string& enum_name)
+{
 }
 
-// Variable and function lookup
-Variable_s Context::GetVariable(const std::string& name) const {
-    // Search scopes from innermost to outermost
-    for (auto it = variable_scopes_.rbegin(); it != variable_scopes_.rend(); ++it) {
-        auto var_it = it->find(name);
-        if (var_it != it->end()) {
-            return var_it->second;
-        }
-    }
-    
-    throw std::runtime_error("Variable not found: " + name);
+void Context::AddEnumValue(const std::string& enum_name, const std::string& value_name, int value)
+{
 }
 
-Function_s Context::GetFunction(const std::string& name) const {
-    auto it = function_table_.find(name);
-    if (it != function_table_.end()) {
-        return it->second;
-    }
-    
-    throw std::runtime_error("Function not found: " + name);
+void Context::AddStruct(const std::string& name, const std::map<std::string, TypeSpecifier>& members)
+{
 }
 
-int Context::GetEnumValue(const std::string& name) const {
-    auto it = enum_values_.find(name);
-    if (it != enum_values_.end()) {
-        return it->second;
-    }
-    
-    throw std::runtime_error("Enum value not found: " + name);
+// Symbol lookup
+int Context::GetEnumValue(const std::string& enum_name, const std::string& value_name) const
+{
+    return 0;
 }
 
-bool Context::VariableExists(const std::string& name) const {
-    // Search scopes from innermost to outermost
-    for (auto it = variable_scopes_.rbegin(); it != variable_scopes_.rend(); ++it) {
-        if (it->find(name) != it->end()) {
-            return true;
-        }
-    }
-    
+Variable_s Context::GetVariable(const std::string& name) const
+{
+    return Variable_s();
+}
+
+Function_s Context::GetFunction(const std::string& name) const
+{
+    return Function_s();
+}
+
+Struct_s Context::GetStruct(const std::string& name) const
+{
+    return Struct_s();
+}
+
+bool Context::VariableExists(const std::string& name) const
+{
     return false;
 }
 
-bool Context::FunctionExists(const std::string& name) const {
-    return function_table_.find(name) != function_table_.end();
+bool Context::FunctionExists(const std::string& name) const
+{
+    return false;
+}
+
+bool Context::StructExists(const std::string& name) const
+{
+    return false;
 }
 
 // Control flow management
-void Context::PushLoopLabels(const std::string& start, const std::string& end, const std::string& update) {
-    loop_start_labels_.push_back(start);
-    loop_end_labels_.push_back(end);
-    loop_update_labels_.push_back(update);
+std::string Context::CreateLabel(const std::string& prefix)
+{
+    return "";
 }
 
-void Context::PopLoopLabels() {
-    if (!loop_start_labels_.empty()) {
-        loop_start_labels_.pop_back();
-        loop_end_labels_.pop_back();
-        loop_update_labels_.pop_back();
-    } else {
-        throw std::runtime_error("No loop labels to pop");
-    }
+std::string Context::GetCurrentLoopStart() const
+{
+    return "";
 }
 
-std::string Context::GetCurrentLoopStart() const {
-    if (!loop_start_labels_.empty()) {
-        return loop_start_labels_.back();
-    }
-    throw std::runtime_error("No active loop");
+std::string Context::GetCurrentLoopEnd() const
+{
+    return "";
 }
 
-std::string Context::GetCurrentLoopEnd() const {
-    if (!loop_end_labels_.empty()) {
-        return loop_end_labels_.back();
-    }
-    throw std::runtime_error("No active loop");
-}
-
-std::string Context::GetCurrentLoopUpdate() const {
-    if (!loop_update_labels_.empty()) {
-        return loop_update_labels_.back();
-    }
-    return ""; // Update label may be empty for while loops
-}
-
-// Label generation
-std::string Context::CreateLabel(const std::string& prefix) {
-    return "_" + prefix + "_" + std::to_string(++label_counter_);
+std::string Context::GetCurrentLoopUpdate() const
+{
+    return "";
 }
 
 // String literal management
-std::string Context::AddStringLiteral(const std::string& value) {
-    std::string label = CreateLabel("str");
-    string_literals_.push_back(std::make_pair(label, value));
-    return label;
+std::string Context::AddStringLiteral(const std::string& value)
+{
+    return "";
 }
 
-void Context::EmitDataSection(std::ostream& dst) const {
-    if (string_literals_.empty()) {
-        return;
-    }
-    
-    dst << "\n.data\n";
-    
-    for (const auto& str : string_literals_) {
-        dst << str.first << ":\n";
-        dst << "    .string \"" << str.second << "\"\n";
-    }
+void Context::EmitDataSection(std::ostream& dst) const
+{
 }
 
 // Type utility functions
-int Context::GetSizeOfType(TypeSpecifier type) {
-    switch (type) {
-        case TypeSpecifier::INT:
-        case TypeSpecifier::UNSIGNED_INT:
-        case TypeSpecifier::LONG:
-        case TypeSpecifier::UNSIGNED_LONG:
-        case TypeSpecifier::FLOAT:
-            return 4;
-        case TypeSpecifier::DOUBLE:
-        case TypeSpecifier::LONG_DOUBLE:
-            return 8;
-        case TypeSpecifier::CHAR:
-        case TypeSpecifier::UNSIGNED_CHAR:
-            return 1;
-        case TypeSpecifier::SHORT:
-        case TypeSpecifier::UNSIGNED_SHORT:
-            return 2;
-        case TypeSpecifier::VOID:
-            return 0;
-        case TypeSpecifier::STRUCT:
-            return 0; // Struct size depends on its members, this will be handled elsewhere
-        default:
-            return 4; // Default to int size
-    }
+int Context::GetSizeOfType(TypeSpecifier type)
+{
+    return 0;
 }
 
-std::string Context::GetLoadInstruction(TypeSpecifier type) {
-    switch (type) {
-        case TypeSpecifier::INT:
-        case TypeSpecifier::UNSIGNED_INT:
-        case TypeSpecifier::LONG:
-        case TypeSpecifier::UNSIGNED_LONG:
-        case TypeSpecifier::SHORT:
-        case TypeSpecifier::UNSIGNED_SHORT: // Promote to word
-            return "lw";
-        case TypeSpecifier::FLOAT:
-            return "flw";
-        case TypeSpecifier::DOUBLE:
-        case TypeSpecifier::LONG_DOUBLE:
-            return "fld";
-        case TypeSpecifier::CHAR:
-            return "lb";
-        case TypeSpecifier::UNSIGNED_CHAR:
-            return "lbu"; // Load unsigned byte
-        default:
-            return "lw"; // Default to word load
-    }
+std::string Context::GetLoadInstruction(TypeSpecifier type)
+{
+    return "";
 }
 
-std::string Context::GetStoreInstruction(TypeSpecifier type) {
-    switch (type) {
-        case TypeSpecifier::INT:
-        case TypeSpecifier::UNSIGNED_INT:
-        case TypeSpecifier::LONG:
-        case TypeSpecifier::UNSIGNED_LONG:
-        case TypeSpecifier::SHORT:
-        case TypeSpecifier::UNSIGNED_SHORT: // Promote to word
-            return "sw";
-        case TypeSpecifier::FLOAT:
-            return "fsw";
-        case TypeSpecifier::DOUBLE:
-        case TypeSpecifier::LONG_DOUBLE:
-            return "fsd";
-        case TypeSpecifier::CHAR:
-        case TypeSpecifier::UNSIGNED_CHAR:
-            return "sb";
-        default:
-            return "sw"; // Default to word store
-    }
+std::string Context::GetStoreInstruction(TypeSpecifier type)
+{
+    return "";
 }
 
 } // namespace ast

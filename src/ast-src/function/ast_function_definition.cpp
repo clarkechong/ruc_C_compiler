@@ -13,7 +13,24 @@ FunctionDefinition::FunctionDefinition(NodePtr declaration_specifiers, NodePtr d
 }
 
 void FunctionDefinition::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context& context) const 
-{
+{    
+    /*
+        new scope, reset everything
+        << ".section .text" 
+        << .globl <id> 
+        << .type <id>, @function
+    */
+
+    auto func_declarator = dynamic_cast<const FunctionDeclarator*>(declarator_.get());
+    if (func_declarator) {
+        std::string function_name = func_declarator->GetID();
+        stream << ".text" << std::endl;
+        stream << ".globl " << function_name << std::endl;
+        stream << ".type " << function_name << ", @function" << std::endl;
+        stream << function_name << ":" << std::endl;
+        compound_statement_->EmitRISCV(stream, dst_reg, context);
+        stream << "ret" << std::endl;
+    }
 }
 
 void FunctionDefinition::Print(std::ostream& stream, indent_t indent) const 

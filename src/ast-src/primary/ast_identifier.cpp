@@ -15,4 +15,9 @@ void Identifier::Print(std::ostream& stream, indent_t indent) const
     stream << id_;
 }
 
+std::string Identifier::GetID() const
+{
+    return id_;
+}
+
 } // namespace ast

@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <unordered_map>
+#include <map>
 #include "type/ast_type_specifier.hpp"
 
 class indent_t {
@@ -40,9 +41,13 @@ struct Variable_s {
 struct Function_s {
     TypeSpecifier return_type;
     std::vector<TypeSpecifier> param_types;
-    bool is_defined = false;
 };
 
+struct Struct_s {
+    std::map<std::string, TypeSpecifier> members;
+    std::map<std::string, int> member_offsets;
+    int size;
+};
 
 class Context 
 {
@@ -50,38 +55,52 @@ public:
     Context();
     ~Context();
 
-    // Register allocation
+    // Register allocation and management
     std::string AllocateRegister(bool is_float = false);
-    void FreeRegister(const std::string& reg);
+    std::string ReturnRegister(bool is_float = false);
+    std::string ArgRegister(int arg_num, bool is_float = false);
+    void DeallocateRegister(const std::string& reg);
+    void SpillRegister(const std::string& reg, std::ostream& dst);
+    void UnspillRegister(const std::string& reg, std::ostream& dst);
+    void PushRegisters(std::ostream& dst);
+    void RestoreRegisters(std::ostream& dst);
+    void ResetRegisters();
     
-    // Memory management
+    // Stack and frame management
+    int AllocateStackSpace(int bytes);
+    void InitiateFrame(std::ostream& dst);
+    void TerminateFrame(std::ostream& dst);
+    int CalculateStackSize();
+    void ResetFramePointer();
+    void ResetStackPointer();
+    
+    // Scope management
     void EnterScope();
     void ExitScope(std::ostream& dst);
-    int AllocateStackSpace(int size);
     
     // Symbol table operations
     void AddVariable(const std::string& name, TypeSpecifier type);
     void AddArray(const std::string& name, TypeSpecifier type, const std::vector<int>& dimensions);
     void AddPointer(const std::string& name, TypeSpecifier type);
     void AddFunction(const std::string& name, TypeSpecifier return_type, const std::vector<TypeSpecifier>& param_types);
-    void AddEnumValue(const std::string& name, int value);
+    void AddEnum(const std::string& enum_name);
+    void AddEnumValue(const std::string& enum_name, const std::string& value_name, int value);
+    void AddStruct(const std::string& name, const std::map<std::string, TypeSpecifier>& members);
     
-    // Variable and function lookup
-    int GetEnumValue(const std::string& name) const;
+    // Symbol lookup
+    int GetEnumValue(const std::string& enum_name, const std::string& value_name) const;
     Variable_s GetVariable(const std::string& name) const;
     Function_s GetFunction(const std::string& name) const;
+    Struct_s GetStruct(const std::string& name) const;
     bool VariableExists(const std::string& name) const;
     bool FunctionExists(const std::string& name) const;
+    bool StructExists(const std::string& name) const;
     
     // Control flow management
-    void PushLoopLabels(const std::string& start, const std::string& end, const std::string& update = "");
-    void PopLoopLabels();
+    std::string CreateLabel(const std::string& prefix);
     std::string GetCurrentLoopStart() const;
     std::string GetCurrentLoopEnd() const;
     std::string GetCurrentLoopUpdate() const;
-    
-    // Label generation
-    std::string CreateLabel(const std::string& prefix);
     
     // String literal management
     std::string AddStringLiteral(const std::string& value);
@@ -123,13 +142,15 @@ private:
 
     // Memory management
     int stack_offset_ = 0;
+    int frame_pointer_offset_ = 0;
     int default_stack_size_ = 128;
     int min_alignment_ = 4;
 
     // Symbol tables
     std::vector<std::unordered_map<std::string, Variable_s>> variable_scopes_;
     std::unordered_map<std::string, Function_s> function_table_;
-    std::unordered_map<std::string, int> enum_values_;
+    std::map<std::string, std::map<std::string, int>> enum_table_;
+    std::map<std::string, Struct_s> struct_table_;
 
     // Control flow state
     std::vector<std::string> loop_start_labels_;

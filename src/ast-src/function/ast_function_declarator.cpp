@@ -15,6 +15,7 @@ FunctionDeclarator::FunctionDeclarator(NodePtr direct_declarator, NodePtr parame
 
 void FunctionDeclarator::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context& context) const 
 {
+    // The function label is now handled by FunctionDefinition
 }
 
 void FunctionDeclarator::Print(std::ostream& stream, indent_t indent) const 
