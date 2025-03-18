@@ -8,13 +8,14 @@
 
 namespace ast {
 
-class Array : public Node
+class GlobArr : public Node
 {
 private:
-    NodePtr expression_;
-    NodePtr index_;
+    const TypeSpecifier declaration_specifiers_;
+    NodePtr declarator_;
+    NodePtr size_;
 public:
-    Array(NodePtr expression, NodePtr index) : expression_(std::move(expression)),index_(std::move(index)){};
+    GlobArr(TypeSpecifier declaration_specifiers, NodePtr declarator, NodePtr size) : declaration_specifiers_(declaration_specifiers), declarator_(std::move(declarator)),size_(std::move(size)){};
 
     void EmitRISC(std::ostream& stream, Context& context) const override;
 

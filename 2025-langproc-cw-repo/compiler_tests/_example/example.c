@@ -1,8 +1,10 @@
-int x;
-int y;
-int g();
+int x[8];
 
 int f()
 {
-    return g(1,2,3,4,5);
+    int y[8];
+    x[0] = 10;
+    x[1] = 20;
+    y[0] = 20;
+    return x[0];
 }

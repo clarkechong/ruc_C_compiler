@@ -1,7 +1,8 @@
 int f()
 {
-    int y;
     int x[8];
-    y=13;
-    return y;
+    int meow;
+    x[0]=13;
+    meow = 20;
+    return x[0];
 }

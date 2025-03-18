@@ -40,7 +40,7 @@
 %type <node> unary_expression cast_expression multiplicative_expression additive_expression shift_expression relational_expression
 %type <node> equality_expression and_expression exclusive_or_expression inclusive_or_expression logical_and_expression logical_or_expression
 %type <node> conditional_expression assignment_expression expression declarator direct_declarator statement compound_statement jump_statement declaration Assignment
-%type <node> constant_initialiser
+%type <node> constant_initialiser Assignment_array
 %type <node> selection_statement iteration_statement
 %type <node> parameter_declaration argument_expression
 
@@ -72,6 +72,12 @@ external_declaration
 	| declaration_specifiers declarator ';' {
 		$$ = new Externdef($1,NodePtr($2), nullptr);
 	}
+	| declaration_specifiers declarator '[' ']' ';'{
+		$$ = new GlobArr($1,NodePtr($2),nullptr);
+	}
+	| declaration_specifiers declarator '[' primary_expression ']' ';'{
+		$$ = new GlobArr($1,NodePtr($2),NodePtr($4));
+	}
 	;
 
 function_definition
@@ -102,6 +108,12 @@ declaration
 		$$ = new Variable($1,std::move(*$2));
 		delete $2;
 	}
+	| declaration_specifiers declarator '[' ']' ';'{
+		$$ = new Localarrdecl($1,NodePtr($2),nullptr);
+	}
+	| declaration_specifiers declarator '[' primary_expression ']' ';'{
+		$$ = new Localarrdecl($1,NodePtr($2),NodePtr($4));
+	}
 	;
 
 
@@ -117,12 +129,21 @@ constant_initialiser
 	:declaration_specifiers declarator '='  expression ';'{
 		$$ = new InitDecl($1,NodePtr($2),NodePtr($4));
 	}
+	;
 
 Assignment
 	: declarator '=' expression ';' {
 		$$ = new Assignment(NodePtr($1),NodePtr($3));
 	}
+	| Assignment_array
+	;
 
+
+Assignment_array
+	: postfix_expression '[' expression ']' '=' expression ';'{
+		$$ = new Arrayassign(NodePtr($1),NodePtr($3),NodePtr($6));
+	}
+	;
 
 direct_declarator
 	: IDENTIFIER {
@@ -135,6 +156,7 @@ direct_declarator
 	| direct_declarator '(' parameter_list ')'{
         $$ = new DirectDeclarator(NodePtr($1),NodePtr($3));
     }
+
 	;
 
 parameter_list
@@ -217,6 +239,9 @@ postfix_expression
     | postfix_expression '(' argument_expression_list ')' {
         $$ = new Funcprim(NodePtr($1),NodePtr($3));
     }
+	| postfix_expression '[' expression ']'{
+		$$ = new Array(NodePtr($1),NodePtr($3));
+	}
 	;
 
 argument_expression_list
@@ -321,7 +346,8 @@ conditional_expression
 	;
 
 assignment_expression
-	: conditional_expression
+	: Assignment_array
+	| conditional_expression
 	;
 
 expression
