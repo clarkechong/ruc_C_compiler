@@ -67,7 +67,8 @@ public:
     void AddFunction(const std::string& name, TypeSpecifier return_type, const std::vector<TypeSpecifier>& param_types);
     void AddEnum(const std::string& enum_name);
     void AddEnumValue(const std::string& enum_name, const std::string& value_name, int value);
-    void AddStruct(const std::string& name, const std::map<std::string, TypeSpecifier>& members, int size);
+    // void AddStruct(const std::string& name, const std::map<std::string, TypeSpecifier>& members, int size);
+    // void AddStructMember(struct's name, member name, member type); // depends whether you construct the struct THEN add it, or add members individually
     
     int GetEnumValue(const std::string& enum_name, const std::string& value_name) const;
     Variable_s GetVariable(const std::string& name) const;
@@ -93,22 +94,18 @@ public:
     StackManager(Context* context);
     ~StackManager();
     
-    int AllocateStackSpace(int bytes);
-    void AllocateStackSpace(std::ostream& dst, int bytes);
+    int AllocateStackSpace(std::ostream& dst, int bytes); // returns the stack pointer offset after new allocation
     void InitiateFrame(std::ostream& dst);
     void TerminateFrame(std::ostream& dst);
 
-    void ResetFramePointer();
-    void ResetStackPointer();
+    void ResetStackPointerOffset();
     
-    int GetStackOffset() const { return stack_offset_; }
-    int GetMinAlignment() const { return min_alignment_; }
+    int GetStackOffset() const;
 
 private:
     Context* context_;
     
-    int stack_offset_ = 0;
-    int frame_pointer_offset_ = 0;
+    int stack_pointer_offset_ = 0;
     int default_stack_size_ = 512;
     int min_alignment_ = 4;
 };
@@ -173,8 +170,8 @@ public:
     void DeallocateRegister(const std::string& reg);
     void SpillRegister(const std::string& reg, std::ostream& dst);
     void UnspillRegister(const std::string& reg, std::ostream& dst);
-    void PushRegisters(std::ostream& dst);
-    void RestoreRegisters(std::ostream& dst);
+    void PushRegisters(std::ostream& dst); // FOR FUNCTION CALLS (ENTIRELY NEW SCOPE)
+    void RestoreRegisters(std::ostream& dst); // FOR RETURNING FROM FUNCTION CALL (RETURN TO OLD SCOPE)
     void ResetRegisters();
 
 private:
@@ -188,7 +185,9 @@ private:
         int stack_offset;
         bool is_float;
     };
-    std::vector<SpilledRegister> spilled_registers_;
+    std::vector<SpilledRegister> spilled_registers_; 
+    // push to when spilling, when unspilling iterate through for stack_offset then erase
+    // do not care whether float or not, just store the register name either way.
     
     struct SavedRegister {
         std::string reg_name;
@@ -196,6 +195,9 @@ private:
         bool is_float;
     };
     std::vector<SavedRegister> saved_registers_;
+    // push to when saving registers when entering function call
+    // pull from when returning from function call
+
 };
 
 class Context 

@@ -159,8 +159,8 @@ void ScopeManager::AddEnumValue(const std::string& enum_name, const std::string&
     }
 }
 
-void ScopeManager::AddStruct(const std::string& name, const std::map<std::string, TypeSpecifier>& members, int size) {
-}
+// void ScopeManager::AddStruct(const std::string& name, const std::map<std::string, TypeSpecifier>& members, int size) {
+// }
 
 Variable_s ScopeManager::GetVariable(const std::string& name) const {
     for (auto it = variable_scopes_.rbegin(); it != variable_scopes_.rend(); ++it) {
@@ -222,28 +222,53 @@ StackManager::StackManager(Context* context) : context_(context) {
 StackManager::~StackManager() {
 }
 
-int StackManager::AllocateStackSpace(int bytes) {
+// RETURN THE NEW STACK POINTER OFFSET WHILST UR AT IT MATE
+int StackManager::AllocateStackSpace(std::ostream& dst, int bytes) {
     int aligned_size = (bytes + min_alignment_ - 1) & ~(min_alignment_ - 1);
-    stack_offset_ -= aligned_size;
-    return stack_offset_;
-}
-
-void StackManager::AllocateStackSpace(std::ostream& dst, int bytes) {
-    int aligned_size = (bytes + min_alignment_ - 1) & ~(min_alignment_ - 1);
-    stack_offset_ -= aligned_size;
+    stack_pointer_offset_ -= aligned_size;
     dst << "    addi sp, sp, -" << aligned_size << std::endl;
+    return stack_pointer_offset_;
 }
 
+// ONLY INITIATE FRAME WHEN A FUNCTION CALL OCCURS. UNNECESSARY TO INITIATE FRAME FOR EVERY SCOPE
 void StackManager::InitiateFrame(std::ostream& dst) {
-    int ra_location = (default_stack_size_ - 4);
-    int s0_location = ra_location - 4;
+    int ra_location = default_stack_size_ - 4;  // i.e. +508
+    int s0_location = ra_location - 4;          // i.e. +504
+
+    /*
+        1. DECREMENT STACK POINTER BY DEFAULT SIZE (512)
+        2. SAVE RETURN ADDRESS TO START OF FRAME - 4
+        3. SAVE FRAME POINTER START OF FRAME - 8
+        4. MAKE FP POINT TO START OF NEW FRAME (I.E. +512)
+
+        E.G.
+        FFFF        ------- NEW FRAME STARTS <---- NEW FP POINTS TO BASE OF NEWLY ALLOCATED STACK
+        FFFF-4      ------- RA STORED HERE
+        FFFF-8      ------- PREVIOUS FP STORED HERE
+
+        ...
+
+        ^^^         ------- E.G. INT X
+        ^^^         ------- STORE VARIABLES UPWARDS FROM HERE
+        FFFF-512    ------- FRAME ENDS (ALLOCATED FRAME 512)
+    */
 
     dst << "    addi sp, sp, -" << default_stack_size_ << std::endl;
     dst << "    sw ra, " << ra_location << "(sp)" << std::endl;
     dst << "    sw s0, " << s0_location << "(sp)" << std::endl;
     dst << "    addi s0, sp, " << default_stack_size_ << std::endl;
 
-    frame_pointer_offset_ = -min_alignment_;
+    // stack_pointer_offset_ += 512;
+
+        /*  ^^^^^^^^^^^^
+            NO!!! stack_pointer_offset != stack pointer!!!
+            stack pointer offset keeps track of the offset relative to the current stackpoint. sounds obvious but its not!!!
+            e.g. function is called and sp -= 512
+            but if you allocate a new local variable you store it at (0)sp
+            but NOW you need to increment stack_pointer_offset!!!
+            such that the next variable you allocate will be at (4)sp (for example)
+            where that 4 is the offset!!!
+        */
 }
 
 void StackManager::TerminateFrame(std::ostream& dst) {
@@ -255,13 +280,14 @@ void StackManager::TerminateFrame(std::ostream& dst) {
     dst << "    addi sp, sp, " << default_stack_size_ << std::endl;
 }
 
-void StackManager::ResetFramePointer() {
-    frame_pointer_offset_ = 0;
+void StackManager::ResetStackPointerOffset() {
+    stack_pointer_offset_ = 0;
 }
 
-void StackManager::ResetStackPointer() {
-    stack_offset_ = 0;
+int StackManager::GetStackOffset() const { 
+    return stack_pointer_offset_; 
 }
+
 
 //=============================================================================
 // LabelManager Implementation
@@ -402,6 +428,10 @@ RegisterManager::RegisterManager(Context* context) : context_(context) {
 RegisterManager::~RegisterManager() {
 }
 
+// EXCLUDE REGISTER FUNCTIONALITY? SUCH THAT IF REGISTER NEEDS TO SPILL, IT DOESNT SPILL ONE THAT IS SPECIFIED TO BE IN USE
+// OR JUST MAKE IT SO THAT IT SPILLS LEAST RECENTLY USED. THAT SHOULD BE SUFFICIENT FOR ANY TESTS
+// E.G. EVERY TIME REGS_[I] IS SET, PUSH BACK TO A FIFO BUFFER
+// IF NEED TO SPILL, POP ELEMENT [0]
 std::string RegisterManager::AllocateRegister(bool is_float) {
     if (is_float) {
         for (int i = 0; i < 32; i++) {
@@ -420,6 +450,7 @@ std::string RegisterManager::AllocateRegister(bool is_float) {
     }
     
     throw std::runtime_error("No available registers");
+    // GET SPILLING THEN RETARD. NEEDS TO BE IMPLEMENTED.
 }
 
 std::string RegisterManager::AllocateReturnRegister(bool is_float) {
@@ -459,11 +490,14 @@ void RegisterManager::DeallocateRegister(const std::string& reg) {
 }
 
 void RegisterManager::SpillRegister(const std::string& reg, std::ostream& dst) {
-    if (reg.empty()) return;
+    if (reg.empty()) {
+        throw std::runtime_error("SpillRegister but reg argument empty???");
+        return;
+    }
     
     bool is_float = (reg[0] == 'f');
     
-    int stack_offset = context_->stack_manager.AllocateStackSpace(is_float ? 8 : 4);
+    int stack_offset = context_->stack_manager.AllocateStackSpace(dst, (is_float ? 8 : 4));
     
     SpilledRegister spilled;
     spilled.reg_name = reg;
@@ -495,7 +529,7 @@ void RegisterManager::UnspillRegister(const std::string& reg, std::ostream& dst)
         }
     }
     
-    throw std::runtime_error("Register not spilled: " + reg);
+    throw std::runtime_error("TRYING TO UNSPILL REGISTER THAT IS NOT SPILLED???: " + reg);
 }
 
 void RegisterManager::PushRegisters(std::ostream& dst) {
@@ -505,7 +539,7 @@ void RegisterManager::PushRegisters(std::ostream& dst) {
         if (regs_[i] == 1 && i >= 5) {
             SavedRegister saved;
             saved.reg_name = "x" + std::to_string(i);
-            saved.stack_offset = context_->stack_manager.AllocateStackSpace(4);
+            saved.stack_offset = context_->stack_manager.AllocateStackSpace(dst, (4));
             saved.is_float = false;
             
             saved_registers_.push_back(saved);
@@ -518,7 +552,7 @@ void RegisterManager::PushRegisters(std::ostream& dst) {
         if (regs_float_[i] == 1) {
             SavedRegister saved;
             saved.reg_name = "f" + std::to_string(i);
-            saved.stack_offset = context_->stack_manager.AllocateStackSpace(8);
+            saved.stack_offset = context_->stack_manager.AllocateStackSpace(dst, (8));
             saved.is_float = true;
             
             saved_registers_.push_back(saved);
