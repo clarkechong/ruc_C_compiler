@@ -223,10 +223,10 @@ StackManager::~StackManager() {
 }
 
 // RETURN THE NEW STACK POINTER OFFSET WHILST UR AT IT MATE
-int StackManager::IncrementStackOffset(int bytes) {
+int StackManager::DecrementFrameOffset(int bytes) {
     int aligned_size = (bytes + min_alignment_ - 1) & ~(min_alignment_ - 1);
-    stack_pointer_offset_ += aligned_size;
-    return stack_pointer_offset_;
+    frame_pointer_offset_ -= aligned_size;
+    return frame_pointer_offset_;
 }
 
 int StackManager::AllocateStackAndLink(TypeSpecifier type, const std::string& id, bool is_ptr, bool is_array, const std::vector<int>& array_dimensions) {
@@ -238,21 +238,21 @@ int StackManager::AllocateStackAndLink(TypeSpecifier type, const std::string& id
             multiplier *= dim;
         }
         bytes = Context::GetSizeOfType(type) * multiplier;
-        int stack_offset = IncrementStackOffset(bytes);
-        context_->scope_manager.AddArray(id, type, array_dimensions, stack_offset);
-        return stack_offset;
+        int frame_offset = DecrementFrameOffset(bytes);
+        context_->scope_manager.AddArray(id, type, array_dimensions, frame_offset);
+        return frame_offset;
     } 
     else if (is_ptr) {
         bytes = 4;
-        int stack_offset = IncrementStackOffset(bytes);
-        context_->scope_manager.AddPointer(id, type, stack_offset);
-        return stack_offset;
+        int frame_offset = DecrementFrameOffset(bytes);
+        context_->scope_manager.AddPointer(id, type, frame_offset);
+        return frame_offset;
     } 
     else {
         bytes = Context::GetSizeOfType(type);
-        int stack_offset = IncrementStackOffset(bytes);
-        context_->scope_manager.AddVariable(id, type, stack_offset);
-        return stack_offset;
+        int frame_offset = DecrementFrameOffset(bytes);
+        context_->scope_manager.AddVariable(id, type, frame_offset);
+        return frame_offset;
     }
 }
 
@@ -261,15 +261,10 @@ void StackManager::StoreRegisterToVariable(std::ostream& dst, const std::string&
         Variable_s var = context_->scope_manager.GetVariable(id);
         
         if (context_->scope_manager.InGlobalScope()) {
-            // This is a global variable, needs %hi and %lo for addressing
-            // For now just note that we need different addressing for globals
-            // dst << "    la t0, " << id << std::endl;
-            // dst << "    " << Context::GetStoreInstruction(var.type) << " " << reg << ", 0(t0)" << std::endl;
             dst << "    # Global variable store - needs implementation with %hi and %lo" << std::endl;
         } else {
-            // This is a local variable, use stack offset or frame pointer
             std::string store_instruction = Context::GetStoreInstruction(var.type);
-            dst << "    " << store_instruction << " " << reg << ", " << var.stack_offset << "(sp)" << std::endl;
+            dst << "    " << store_instruction << " " << reg << ", " << var.stack_offset << "(s0)" << std::endl;
         }
     } catch (const std::runtime_error& e) {
         dst << "    # Error: Variable not found: " << id << std::endl;
@@ -281,11 +276,10 @@ void StackManager::LoadVariableToRegister(std::ostream& dst, const std::string& 
         Variable_s var = context_->scope_manager.GetVariable(id);
         
         if (context_->scope_manager.InGlobalScope()) {
-            // this is a global variable, needs %hi and %lo for addressing
             dst << "    # Global variable load - needs implementation with %hi and %lo" << std::endl;
         } else {
             std::string load_instruction = Context::GetLoadInstruction(var.type);
-            dst << "    " << load_instruction << " " << reg << ", " << var.stack_offset << "(sp)" << std::endl;
+            dst << "    " << load_instruction << " " << reg << ", " << var.stack_offset << "(s0)" << std::endl;
         }
     } catch (const std::runtime_error& e) {
         dst << "    # Error: Variable not found: " << id << std::endl;
@@ -294,60 +288,32 @@ void StackManager::LoadVariableToRegister(std::ostream& dst, const std::string& 
 
 // ONLY INITIATE FRAME WHEN A FUNCTION CALL OCCURS. UNNECESSARY TO INITIATE FRAME FOR EVERY SCOPE
 void StackManager::InitiateFrame(std::ostream& dst) {
-    int ra_location = default_stack_size_ - 4;  // i.e. +508
-    int s0_location = ra_location - 4;          // i.e. +504
-
-    /*
-        1. DECREMENT STACK POINTER BY DEFAULT SIZE (512)
-        2. SAVE RETURN ADDRESS TO START OF FRAME - 4
-        3. SAVE FRAME POINTER START OF FRAME - 8
-        4. MAKE FP POINT TO START OF NEW FRAME (I.E. +512)
-
-        E.G.
-        FFFF        ------- NEW FRAME STARTS <---- NEW FP POINTS TO BASE OF NEWLY ALLOCATED STACK
-        FFFF-4      ------- RA STORED HERE
-        FFFF-8      ------- PREVIOUS FP STORED HERE
-
-        ...
-
-        ^^^         ------- E.G. INT X
-        ^^^         ------- STORE VARIABLES UPWARDS FROM HERE
-        FFFF-512    ------- FRAME ENDS (ALLOCATED FRAME 512)
-    */
+    int save_ra_location = default_stack_size_ - 4;
+    int save_s0_location = save_ra_location - 4;
 
     dst << "    addi sp, sp, -" << default_stack_size_ << std::endl;
-    dst << "    sw ra, " << ra_location << "(sp)" << std::endl;
-    dst << "    sw s0, " << s0_location << "(sp)" << std::endl;
+    dst << "    sw ra, " << save_ra_location << "(sp)" << std::endl;
+    dst << "    sw s0, " << save_s0_location << "(sp)" << std::endl;
     dst << "    addi s0, sp, " << default_stack_size_ << std::endl;
 
-    // stack_pointer_offset_ += 512;
-
-        /*  ^^^^^^^^^^^^
-            NO!!! stack_pointer_offset != stack pointer!!!
-            stack pointer offset keeps track of the offset relative to the current stackpoint. sounds obvious but its not!!!
-            e.g. function is called and sp -= 512
-            but if you allocate a new local variable you store it at (0)sp
-            but NOW you need to increment stack_pointer_offset!!!
-            such that the next variable you allocate will be at (4)sp (for example)
-            where that 4 is the offset!!!
-        */
+    frame_pointer_offset_ -= 16;
 }
 
 void StackManager::TerminateFrame(std::ostream& dst) {
-    int ra_location = (default_stack_size_ - 4);
-    int s0_location = ra_location - 4;
+    int save_ra_location = (default_stack_size_ - 4);
+    int save_s0_location = save_ra_location - 4;
 
-    dst << "    lw ra, " << ra_location << "(sp)" << std::endl;
-    dst << "    lw s0, " << s0_location << "(sp)" << std::endl;
+    dst << "    lw ra, " << save_ra_location << "(sp)" << std::endl;
+    dst << "    lw s0, " << save_s0_location << "(sp)" << std::endl;
     dst << "    addi sp, sp, " << default_stack_size_ << std::endl;
 }
 
-void StackManager::ResetStackPointerOffset() {
-    stack_pointer_offset_ = 0;
+void StackManager::ResetFrameOffset() {
+    frame_pointer_offset_ = 0;
 }
 
-int StackManager::GetStackOffset() const { 
-    return stack_pointer_offset_; 
+int StackManager::GetFrameOffset() const { 
+    return frame_pointer_offset_; 
 }
 
 
@@ -496,23 +462,64 @@ RegisterManager::~RegisterManager() {
 // IF NEED TO SPILL, POP ELEMENT [0]
 std::string RegisterManager::AllocateRegister(bool is_float) {
     if (is_float) {
-        for (int i = 0; i < 32; i++) {
+        for (int i = 0; i <= 7; i++) { // ft0-ft7
             if (regs_float_[i] == 0) {
                 regs_float_[i] = 1;
-                return "f" + std::to_string(i);
+                return "ft" + std::to_string(i);
+            }
+        }
+        
+        for (int i = 8; i <= 9; i++) { // fs0-fs1
+            if (regs_float_[i] == 0) {
+                regs_float_[i] = 1;
+                return "fs" + std::to_string(i - 8);
+            }
+        }
+        
+        for (int i = 18; i <= 27; i++) { // fs2-fs11
+            if (regs_float_[i] == 0) {
+                regs_float_[i] = 1;
+                return "fs" + std::to_string(i - 16);
+            }
+        }
+        
+        for (int i = 28; i <= 31; i++) { // ft8-ft11
+            if (regs_float_[i] == 0) {
+                regs_float_[i] = 1;
+                return "ft" + std::to_string(i - 20); // ft8 = 28-20, ft9 = 29-20, etc.
             }
         }
     } else {
-        for (int i = 5; i < 32; i++) {
+        for (int i = 5; i <= 7; i++) { // t0-t2
             if (regs_[i] == 0) {
                 regs_[i] = 1;
-                return "x" + std::to_string(i);
+                return "t" + std::to_string(i - 5);
+            }
+        }
+        
+        for (int i = 9; i <= 9; i++) { // s1
+            if (regs_[i] == 0) {
+                regs_[i] = 1;
+                return "s1";
+            }
+        }
+        
+        for (int i = 18; i <= 27; i++) { // s2-s11
+            if (regs_[i] == 0) {
+                regs_[i] = 1;
+                return "s" + std::to_string(i - 16);
+            }
+        }
+        
+        for (int i = 28; i <= 31; i++) { // t3-t6
+            if (regs_[i] == 0) {
+                regs_[i] = 1;
+                return "t" + std::to_string(i - 25); // t3 = 28-25, t4 = 29-25, etc.
             }
         }
     }
     
     throw std::runtime_error("No available registers");
-    // GET SPILLING THEN RETARD. NEEDS TO BE IMPLEMENTED.
 }
 
 std::string RegisterManager::AllocateReturnRegister(bool is_float) {
@@ -553,14 +560,18 @@ void RegisterManager::DeallocateRegister(const std::string& reg) {
     if (reg.empty()) return;
     
     if (reg[0] == 'f') {
-        int reg_num = std::stoi(reg.substr(1));
-        if (reg_num >= 0 && reg_num < 32) {
+        auto it = register_map_f.find(reg);
+        if (it != register_map_f.end()) {
+            int reg_num = it->second;
             regs_float_[reg_num] = 0;
+            return;
         }
-    } else if (reg[0] == 'x') {
-        int reg_num = std::stoi(reg.substr(1));
-        if (reg_num >= 5 && reg_num < 32) {
+    } else {
+        auto it = register_map.find(reg);
+        if (it != register_map.end()) {
+            int reg_num = it->second;
             regs_[reg_num] = 0;
+            return;
         }
     }
 }
@@ -573,19 +584,19 @@ void RegisterManager::SpillRegister(const std::string& reg, std::ostream& dst) {
     
     bool is_float = (reg[0] == 'f');
     
-    int stack_offset = context_->stack_manager.IncrementStackOffset((is_float ? 8 : 4));
+    int frame_offset = context_->stack_manager.DecrementFrameOffset((is_float ? 8 : 4));
     
     SpilledRegister spilled;
     spilled.reg_name = reg;
-    spilled.stack_offset = stack_offset;
+    spilled.stack_offset = frame_offset;
     spilled.is_float = is_float;
     
     spilled_registers_.push_back(spilled);
     
     if (is_float) {
-        dst << "    fsw " << reg << ", " << stack_offset << "(s0)" << std::endl;
+        dst << "    fsw " << reg << ", " << frame_offset << "(s0)" << std::endl;
     } else {
-        dst << "    sw " << reg << ", " << stack_offset << "(s0)" << std::endl;
+        dst << "    sw " << reg << ", " << frame_offset << "(s0)" << std::endl;
     }
     
     DeallocateRegister(reg);
@@ -615,7 +626,7 @@ void RegisterManager::PushRegisters(std::ostream& dst) {
         if (regs_[i] == 1 && i >= 5) {
             SavedRegister saved;
             saved.reg_name = "x" + std::to_string(i);
-            saved.stack_offset = context_->stack_manager.IncrementStackOffset(4);
+            saved.stack_offset = context_->stack_manager.DecrementFrameOffset(4);
             saved.is_float = false;
             
             saved_registers_.push_back(saved);
@@ -628,7 +639,7 @@ void RegisterManager::PushRegisters(std::ostream& dst) {
         if (regs_float_[i] == 1) {
             SavedRegister saved;
             saved.reg_name = "f" + std::to_string(i);
-            saved.stack_offset = context_->stack_manager.IncrementStackOffset(8);
+            saved.stack_offset = context_->stack_manager.DecrementFrameOffset(8);
             saved.is_float = true;
             
             saved_registers_.push_back(saved);

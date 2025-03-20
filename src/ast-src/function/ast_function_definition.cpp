@@ -23,7 +23,7 @@ void FunctionDefinition::EmitRISCV(std::ostream& stream, const std::string& dst_
     std::string func_name = decl->GetID();
     
     context.register_manager.ResetRegisters();
-    context.stack_manager.ResetStackPointerOffset();
+    context.stack_manager.ResetFrameOffset();
     
     // push function context (for return statements)
     context.label_manager.PushFunctionContext(func_name);
