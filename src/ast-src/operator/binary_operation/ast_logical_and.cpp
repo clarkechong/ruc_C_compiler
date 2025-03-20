@@ -14,23 +14,28 @@ LogicalAnd::LogicalAnd(NodePtr left, NodePtr right)
 
 void LogicalAnd::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context& context) const 
 {
-    std::string left_reg = context.register_manager.AllocateRegister();
-    std::string right_reg = context.register_manager.AllocateRegister();
-    std::string end_label = context.label_manager.CreateLabel("and_end");
+    TypeSpecifier type = TypeSpecifier::INT;
     
-    left_op_->EmitRISCV(stream, left_reg, context);
+    std::string label1 = context.label_manager.CreateLabel("LOGICAL_AND");
+    std::string label2 = context.label_manager.CreateLabel("LOGICAL_AND");
     
-    stream << "    beqz " << left_reg << ", " << end_label << std::endl;
+    std::string temp_reg = context.register_manager.AllocateRegister();
     
-    right_op_->EmitRISCV(stream, right_reg, context);
+    left_op_->EmitRISCV(stream, temp_reg, context);
+    stream << "    beq " << temp_reg << ", zero, " << label1 << std::endl;
     
-    stream << "    snez " << dst_reg << ", " << right_reg << std::endl;
-    stream << "    j " << end_label << std::endl;
-    stream << end_label << ":" << std::endl;
+    right_op_->EmitRISCV(stream, temp_reg, context);
+    stream << "    beq " << temp_reg << ", zero, " << label1 << std::endl;
+    
+    stream << "    li " << dst_reg << ", 1" << std::endl;
+    stream << "    j " << label2 << std::endl;
+    
+    stream << label1 << ":" << std::endl;
     stream << "    li " << dst_reg << ", 0" << std::endl;
     
-    context.register_manager.DeallocateRegister(left_reg);
-    context.register_manager.DeallocateRegister(right_reg);
+    stream << label2 << ":" << std::endl;
+    
+    context.register_manager.DeallocateRegister(temp_reg);
 }
 
 void LogicalAnd::Print(std::ostream& stream, indent_t indent) const 

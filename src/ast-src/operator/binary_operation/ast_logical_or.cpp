@@ -14,23 +14,31 @@ LogicalOr::LogicalOr(NodePtr left, NodePtr right)
 
 void LogicalOr::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context& context) const 
 {
-    std::string left_reg = context.register_manager.AllocateRegister();
-    std::string right_reg = context.register_manager.AllocateRegister();
-    std::string end_label = context.label_manager.CreateLabel("or_end");
+    TypeSpecifier type = TypeSpecifier::INT;
     
-    left_op_->EmitRISCV(stream, left_reg, context);
+    std::string temp_reg = context.register_manager.AllocateRegister();
     
-    stream << "    bnez " << left_reg << ", " << end_label << std::endl;
+    std::string label1 = context.label_manager.CreateLabel("LOGICAL_OR");
+    std::string label2 = context.label_manager.CreateLabel("LOGICAL_OR");
+    std::string label_end = context.label_manager.CreateLabel("LOGICAL_OR");
     
-    right_op_->EmitRISCV(stream, right_reg, context);
+    left_op_->EmitRISCV(stream, temp_reg, context);
+    stream << "    bne " << temp_reg << ", zero, " << label1 << std::endl;
     
-    stream << "    snez " << dst_reg << ", " << right_reg << std::endl;
-    stream << "    j " << end_label << std::endl;
-    stream << end_label << ":" << std::endl;
-    stream << "    li " << dst_reg << ", 1" << std::endl;
+    right_op_->EmitRISCV(stream, temp_reg, context);
+    stream << "    beq " << temp_reg << ", zero, " << label2 << std::endl;
     
-    context.register_manager.DeallocateRegister(left_reg);
-    context.register_manager.DeallocateRegister(right_reg);
+    stream << label1 << ":" << std::endl;
+    stream << "    li " << temp_reg << ", 1" << std::endl;
+    stream << "    j " << label_end << std::endl;
+    
+    stream << label2 << ":" << std::endl;
+    stream << "    li " << temp_reg << ", 0" << std::endl;
+    
+    stream << label_end << ":" << std::endl;
+    stream << "    mv " << dst_reg << ", " << temp_reg << std::endl;
+    
+    context.register_manager.DeallocateRegister(temp_reg);
 }
 
 void LogicalOr::Print(std::ostream& stream, indent_t indent) const 
