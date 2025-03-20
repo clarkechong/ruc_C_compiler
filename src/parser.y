@@ -447,9 +447,9 @@ statement
 	;
 
 labeled_statement
-	: IDENTIFIER ':' statement					{ /* Labeled statement */ }
-	| CASE constant_expression ':' statement	{ /* Case statement */ }
-	| DEFAULT ':' statement						{ /* Default case */ }
+	: IDENTIFIER ':' statement					{ /* Labeled statement - not implemented */ }
+	| CASE constant_expression ':' statement	{ $$ = new Case(NodePtr($2), NodePtr($4)); }
+	| DEFAULT ':' statement						{ $$ = new Default(NodePtr($3)); }
 	;
 
 compound_statement // compound statement = block = scope
@@ -477,7 +477,7 @@ expression_statement
 selection_statement
 	: IF '(' expression ')' statement						{ $$ = new IfElse(NodePtr($3), NodePtr($5), nullptr); /* Set condition and true branch */ }
 	| IF '(' expression ')' statement ELSE statement		{ $$ = new IfElse(NodePtr($3), NodePtr($5), NodePtr($7)); /* Set condition, true and false branches */ }
-	| SWITCH '(' expression ')' statement					{ $$ = new Switch(); /* Set expression and cases */ }
+	| SWITCH '(' expression ')' statement					{ $$ = new Switch(NodePtr($3), NodePtr($5)); /* Set expression and body containing cases */ }
 	;
 
 iteration_statement

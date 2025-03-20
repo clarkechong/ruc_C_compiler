@@ -139,6 +139,11 @@ public:
     void PopLoopEnd();
     void PopLoopUpdate();
     
+    // switch label management
+    void PushSwitchContext(const std::string& switch_reg);
+    void PopSwitchContext();
+    std::string GetCurrentSwitchReg() const;
+    
     // string literal management
     std::string AddStringLiteral(const std::string& value);
     void EmitDataSection(std::ostream& dst) const;
@@ -156,6 +161,9 @@ private:
     std::vector<std::string> loop_start_labels_;
     std::vector<std::string> loop_end_labels_;
     std::vector<std::string> loop_update_labels_;
+    
+    // switch context stack
+    std::stack<std::string> switch_reg_stack_;
     
     // string literals for .data section
     std::vector<std::pair<std::string, std::string>> string_literals_;

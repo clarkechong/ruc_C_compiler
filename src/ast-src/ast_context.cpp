@@ -588,6 +588,26 @@ void LabelManager::EmitDataSection(std::ostream& dst) const {
     }
 }
 
+// Switch label management
+void LabelManager::PushSwitchContext(const std::string& switch_reg) {
+    switch_reg_stack_.push(switch_reg);
+}
+
+void LabelManager::PopSwitchContext() {
+    if (!switch_reg_stack_.empty()) {
+        switch_reg_stack_.pop();
+    } else {
+        throw std::runtime_error("No switch context to pop");
+    }
+}
+
+std::string LabelManager::GetCurrentSwitchReg() const {
+    if (switch_reg_stack_.empty()) {
+        throw std::runtime_error("Not in a switch context");
+    }
+    return switch_reg_stack_.top();
+}
+
 //=============================================================================
 // RegisterManager Implementation
 //=============================================================================
