@@ -16,26 +16,7 @@ Divide::Divide(NodePtr left, NodePtr right)
 
 void Divide::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context& context) const 
 {
-    bool is_float = false;
-    bool is_double = false;
-    
-    if (dynamic_cast<Float*>(left_op_.get())) is_float = true;
-    else if (dynamic_cast<Identifier*>(left_op_.get())) {
-        try {
-            Variable_s var = context.scope_manager.GetVariable(dynamic_cast<Identifier*>(left_op_.get())->GetID());
-            if (var.type == TypeSpecifier::FLOAT) is_float = true;
-            else if (var.type == TypeSpecifier::DOUBLE) is_double = true;
-        } catch (const std::runtime_error&) {}
-    }
-    
-    if (dynamic_cast<Float*>(right_op_.get())) is_float = true;
-    else if (dynamic_cast<Identifier*>(right_op_.get())) {
-        try {
-            Variable_s var = context.scope_manager.GetVariable(dynamic_cast<Identifier*>(right_op_.get())->GetID());
-            if (var.type == TypeSpecifier::FLOAT) is_float = true;
-            else if (var.type == TypeSpecifier::DOUBLE) is_double = true;
-        } catch (const std::runtime_error&) {}
-    }
+    auto [is_float, is_double] = CheckOperandTypes(context);
 
     if (is_float || is_double) {
         std::string left_reg = context.register_manager.AllocateRegister(true);

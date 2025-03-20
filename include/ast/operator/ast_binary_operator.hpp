@@ -9,6 +9,7 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <tuple>
 
 #include "ast/ast_node.hpp"
 #include "ast/ast_context.hpp"
@@ -25,6 +26,9 @@ class BinaryOperator : public Node
         virtual void Print(std::ostream &stream, indent_t indent) const override;
 
     protected:
+        // Helper method to check operand types (returns tuple of is_float, is_double)
+        std::tuple<bool, bool> CheckOperandTypes(Context &context) const;
+        
         NodePtr left_op_;
         NodePtr right_op_;
 };
