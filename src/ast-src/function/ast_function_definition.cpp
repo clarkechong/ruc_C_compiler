@@ -1,5 +1,4 @@
 #include "ast/function/ast_function_definition.hpp"
-#include "ast/ast_declarator.hpp"
 
 namespace ast {
 
@@ -16,11 +15,12 @@ FunctionDefinition::FunctionDefinition(NodePtr declaration_specifiers, NodePtr d
 void FunctionDefinition::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context& context) const 
 {
     Declarator* decl = dynamic_cast<Declarator*>(declarator_.get());
-    if (!decl) {
-        throw std::runtime_error("Function definition has invalid declarator");
-    }
-    
     std::string func_name = decl->GetID();
+
+    DeclarationType* type = dynamic_cast<DeclarationType*>(declaration_specifiers_.get());
+    TypeSpecifier return_type = type->GetType();
+
+    std::string return_reg = context.register_manager.AllocateReturnRegister(return_type == TypeSpecifier::DOUBLE || return_type == TypeSpecifier::FLOAT);
     
     context.register_manager.ResetRegisters();
     context.stack_manager.ResetFrameOffset();
@@ -35,16 +35,15 @@ void FunctionDefinition::EmitRISCV(std::ostream& stream, const std::string& dst_
     
     // the declarator handles printing the function start label
     if (declarator_) { // there should always be a FunctionDeclarator for a function definition...
-        declarator_->EmitRISCV(stream, dst_reg, context);
+        declarator_->EmitRISCV(stream, return_reg, context);
     }
     
     if (compound_statement_) {
-        compound_statement_->EmitRISCV(stream, dst_reg, context);
+        compound_statement_->EmitRISCV(stream, return_reg, context);
     }
     
-    // end label and function cleanup
     stream << end_label << ":\n";
-    context.scope_manager.ExitScope(stream);
+    context.scope_manager.ExitScope();
     context.stack_manager.TerminateFrame(stream);
     stream << "    ret\n\n";
     

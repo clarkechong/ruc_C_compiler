@@ -57,7 +57,7 @@ public:
     ~ScopeManager();
     
     void EnterNewScope();
-    void ExitScope(std::ostream& dst);
+    void ExitScope();
     
     bool InGlobalScope() const;
     

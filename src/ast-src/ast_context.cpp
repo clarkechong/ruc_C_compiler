@@ -99,7 +99,7 @@ void ScopeManager::EnterNewScope() {
     variable_scopes_.push_back(std::unordered_map<std::string, Variable_s>());
 }
 
-void ScopeManager::ExitScope(std::ostream& dst) {
+void ScopeManager::ExitScope() {
     if (variable_scopes_.size() > 1) {
         variable_scopes_.pop_back();
     } else {
@@ -623,41 +623,116 @@ void RegisterManager::UnspillRegister(const std::string& reg, std::ostream& dst)
 }
 
 void RegisterManager::PushRegisters(std::ostream& dst) {
+    dst << "    # Pushing registers to stack" << std::endl;
     saved_registers_.clear();
     
-    for (int i = 0; i < 32; i++) {
-        if (regs_[i] == 1 && i >= 5) {
+    // Save floating point temporary registers (ft0-ft7, ft8-ft11)
+    for (int i = 0; i <= 7; ++i) {
+        std::string reg_name = "ft" + std::to_string(i);
+        auto it = register_map_f.find(reg_name);
+        if (it != register_map_f.end() && regs_float_[it->second] == 1) {
             SavedRegister saved;
-            saved.reg_name = "x" + std::to_string(i);
+            saved.reg_name = reg_name;
+            saved.stack_offset = context_->stack_manager.DecrementFrameOffset(4);
+            saved.is_float = true;
+            
+            saved_registers_.push_back(saved);
+            regs_float_[it->second] = 0;  // Mark as available during the function call
+            
+            dst << "    fsw " << reg_name << ", " << saved.stack_offset << "(s0)" << std::endl;
+        }
+    }
+    
+    for (int i = 8; i <= 11; ++i) {
+        std::string reg_name = "ft" + std::to_string(i);
+        auto it = register_map_f.find(reg_name);
+        if (it != register_map_f.end() && regs_float_[it->second] == 1) {
+            SavedRegister saved;
+            saved.reg_name = reg_name;
+            saved.stack_offset = context_->stack_manager.DecrementFrameOffset(4);
+            saved.is_float = true;
+            
+            saved_registers_.push_back(saved);
+            regs_float_[it->second] = 0;  // Mark as available during the function call
+            
+            dst << "    fsw " << reg_name << ", " << saved.stack_offset << "(s0)" << std::endl;
+        }
+    }
+    
+    // Save integer temporary registers (t0-t2, t3-t6)
+    for (int i = 0; i <= 2; ++i) {
+        std::string reg_name = "t" + std::to_string(i);
+        auto it = register_map.find(reg_name);
+        if (it != register_map.end() && regs_[it->second] == 1) {
+            SavedRegister saved;
+            saved.reg_name = reg_name;
             saved.stack_offset = context_->stack_manager.DecrementFrameOffset(4);
             saved.is_float = false;
             
             saved_registers_.push_back(saved);
+            regs_[it->second] = 0;  // Mark as available during the function call
             
-            dst << "    sw " << saved.reg_name << ", " << saved.stack_offset << "(s0)" << std::endl;
+            dst << "    sw " << reg_name << ", " << saved.stack_offset << "(s0)" << std::endl;
         }
     }
     
-    for (int i = 0; i < 32; i++) {
-        if (regs_float_[i] == 1) {
+    for (int i = 3; i <= 6; ++i) {
+        std::string reg_name = "t" + std::to_string(i);
+        auto it = register_map.find(reg_name);
+        if (it != register_map.end() && regs_[it->second] == 1) {
             SavedRegister saved;
-            saved.reg_name = "f" + std::to_string(i);
-            saved.stack_offset = context_->stack_manager.DecrementFrameOffset(8);
-            saved.is_float = true;
+            saved.reg_name = reg_name;
+            saved.stack_offset = context_->stack_manager.DecrementFrameOffset(4);
+            saved.is_float = false;
             
             saved_registers_.push_back(saved);
+            regs_[it->second] = 0;  // Mark as available during the function call
             
-            dst << "    fsw " << saved.reg_name << ", " << saved.stack_offset << "(s0)" << std::endl;
+            dst << "    sw " << reg_name << ", " << saved.stack_offset << "(s0)" << std::endl;
+        }
+    }
+    
+    // Save argument registers (a0-a7)
+    for (int i = 0; i <= 7; ++i) {
+        std::string reg_name = "a" + std::to_string(i);
+        auto it = register_map.find(reg_name);
+        if (it != register_map.end() && regs_[it->second] == 1) {
+            SavedRegister saved;
+            saved.reg_name = reg_name;
+            saved.stack_offset = context_->stack_manager.DecrementFrameOffset(4);
+            saved.is_float = false;
+            
+            saved_registers_.push_back(saved);
+            regs_[it->second] = 0;  // Mark as available during the function call
+            
+            dst << "    sw " << reg_name << ", " << saved.stack_offset << "(s0)" << std::endl;
         }
     }
 }
 
 void RegisterManager::RestoreRegisters(std::ostream& dst) {
+    dst << "    # Restoring registers from stack" << std::endl;
+    
+    // Restore in reverse order (LIFO)
     for (auto it = saved_registers_.rbegin(); it != saved_registers_.rend(); ++it) {
         if (it->is_float) {
+            // Handle floating-point registers
             dst << "    flw " << it->reg_name << ", " << it->stack_offset << "(s0)" << std::endl;
+            
+            // Mark the register as in use again
+            auto map_it = register_map_f.find(it->reg_name);
+            if (map_it != register_map_f.end()) {
+                regs_float_[map_it->second] = 1;
+            }
         } else {
+            // Handle integer registers
             dst << "    lw " << it->reg_name << ", " << it->stack_offset << "(s0)" << std::endl;
+            
+            // Mark the register as in use again
+            auto map_it = register_map.find(it->reg_name);
+            if (map_it != register_map.end()) {
+                regs_[map_it->second] = 1;
+            }
         }
     }
     

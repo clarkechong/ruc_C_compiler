@@ -14,10 +14,9 @@ Return::Return(NodePtr expr)
 
 void Return::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context& context) const 
 {
+    // stream << "    # DEBUG: Left operand type: " << typeid(*expr_).name() << std::endl;
     if (expr_) {
-        expr_->EmitRISCV(stream, "a0", context);
-    } else {
-        stream << "    li a0, 0\n"; // if no return value, set a0 to 0
+        expr_->EmitRISCV(stream, dst_reg, context);
     }
     
     std::string end_label = context.label_manager.GetCurrentFunctionEndLabel();

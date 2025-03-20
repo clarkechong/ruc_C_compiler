@@ -20,8 +20,10 @@ void FunctionCall::EmitRISCV(std::ostream& stream, const std::string& dst_reg, C
     if (Identifier* ident = dynamic_cast<Identifier*>(function_.get())) {
         function_name = ident->GetID();
     } else {
-        throw std::runtime_error("Function call with non-identifier function expression not supported");
+        throw std::runtime_error("function name is not type identifier or something like that");
     }
+
+    context.register_manager.PushRegisters(stream);
     
     if (arguments_) {
         NodeList* arg_list = dynamic_cast<NodeList*>(arguments_.get());
@@ -38,7 +40,9 @@ void FunctionCall::EmitRISCV(std::ostream& stream, const std::string& dst_reg, C
     
     stream << "    call " << function_name << "\n";
     
-    // return value is automatically in a0 for integer returns
+    context.register_manager.RestoreRegisters(stream);
+    
+    // return value is automatically in a0 for integer returns BUT WHAT ABOUT FLOATS
     // if destination is not a0, copy it
     if (dst_reg != "a0") {
         stream << "    mv " << dst_reg << ", a0\n";

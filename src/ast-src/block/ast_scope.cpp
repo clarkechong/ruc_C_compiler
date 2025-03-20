@@ -28,7 +28,7 @@ void Scope::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context&
         stream << "    li a0, 0    # default return value for empty scope\n";
     }
     
-    context.scope_manager.ExitScope(stream);
+    context.scope_manager.ExitScope();
 }
 
 void Scope::Print(std::ostream& stream, indent_t indent) const 

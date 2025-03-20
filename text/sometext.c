@@ -1,9 +1,4 @@
-int f()
+double f(double x, double y)
 {
-    int x;
-    x=20;
-    // while(x > 10){
-    //     x=x-1;
-    // }
-    return x>10;
+    return x+y;
 }
