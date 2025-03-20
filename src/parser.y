@@ -96,7 +96,7 @@ primary_expression
 
 postfix_expression
 	: primary_expression									{ $$ = $1; }
-	| postfix_expression '[' expression ']'					{ $$ = new ArrayAccess(NodePtr($1), NodePtr($3)); }
+	| postfix_expression '[' expression ']'					{ $$ = new ArrayDeclarator(NodePtr($1), NodePtr($3)); }
 	| postfix_expression '(' ')'							{ $$ = new FunctionCall(NodePtr($1), nullptr); }
 	| postfix_expression '(' argument_expression_list ')'	{ $$ = new FunctionCall(NodePtr($1), NodePtr($3)); }
 	| postfix_expression '.' IDENTIFIER						{ /* Struct member access */ }
@@ -333,8 +333,8 @@ declarator
 direct_declarator
 	: IDENTIFIER										{ $$ = new Identifier(*$1); } // new Identifier
 	| '(' declarator ')' 								{ $$ = $2; }	// { /* $$ = std::move($2) */ }
-	| direct_declarator '[' constant_expression ']' 	{ $$ = new ArrayDeclarator(); /* Array with size */ }
-	| direct_declarator '[' ']' 						{ $$ = new ArrayDeclarator(); /* Array without size */ }
+	| direct_declarator '[' constant_expression ']' 	{ $$ = new ArrayDeclarator(NodePtr($1), NodePtr($3)); /* Array with size */ }
+	| direct_declarator '[' ']' 						{ $$ = new ArrayDeclarator(NodePtr($1), nullptr); /* Array without size */ }
 	| direct_declarator '(' parameter_list ')'			{ $$ = new FunctionDeclarator(NodePtr($1), NodePtr($3)); /* Function with parameters */ }
 	| direct_declarator '(' ')'							{ $$ = new FunctionDeclarator(NodePtr($1), nullptr); /* Function without parameters */ }
 	// | direct_declarator '(' identifier_list ')' // OLD K&R STYLE
@@ -342,7 +342,7 @@ direct_declarator
 
 pointer
 	: '*'			{ $$ = new Pointer(); }
-	| '*' pointer	{ $$ = new Pointer(); /* Nested pointers */ }
+	| '*' pointer	{ $$ = new Pointer(); /* nested pointer */ }
 	// | '*' type_qualifier_list
 	// | '*' type_qualifier_list pointer
 	;
@@ -380,12 +380,14 @@ type_name
 	| specifier_qualifier_list abstract_declarator		{ /* Type with abstract declarator */ }
 	;
 
+// CAN BE IGNORED
 abstract_declarator
 	: pointer								{ $$ = $1; }
 	| direct_abstract_declarator			{ $$ = $1; }
 	| pointer direct_abstract_declarator	{ /* Pointer to abstract declarator */ }
 	;
 
+// CAN BE IGNORED
 direct_abstract_declarator
 	: '(' abstract_declarator ')'								{ $$ = $2; }
 	| '[' ']'													{ /* Array type */ }

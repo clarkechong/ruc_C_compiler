@@ -90,6 +90,7 @@ std::string Context::GetStoreInstruction(TypeSpecifier type) {
 
 ScopeManager::ScopeManager(Context* context) : context_(context) {
     variable_scopes_.push_back(std::unordered_map<std::string, Variable_s>());
+    struct_scopes_.push_back(std::unordered_map<std::string, std::map<std::string, Variable_s>>());
 }
 
 ScopeManager::~ScopeManager() {
@@ -97,11 +98,13 @@ ScopeManager::~ScopeManager() {
 
 void ScopeManager::EnterNewScope() {
     variable_scopes_.push_back(std::unordered_map<std::string, Variable_s>());
+    struct_scopes_.push_back(std::unordered_map<std::string, std::map<std::string, Variable_s>>());
 }
 
 void ScopeManager::ExitScope() {
     if (variable_scopes_.size() > 1) {
         variable_scopes_.pop_back();
+        struct_scopes_.pop_back();
     } else {
         throw std::runtime_error("Cannot exit global scope");
     }
@@ -159,8 +162,65 @@ void ScopeManager::AddEnumValue(const std::string& enum_name, const std::string&
     }
 }
 
-// void ScopeManager::AddStruct(const std::string& name, const std::map<std::string, TypeSpecifier>& members, int size) {
-// }
+void ScopeManager::AddStruct(const std::string& name) {
+    // Add an empty struct to the current scope
+    struct_scopes_.back()[name] = std::map<std::string, Variable_s>();
+}
+
+void ScopeManager::AddStructMember(const std::string& struct_name, const std::string& member_name, 
+                                  TypeSpecifier type, int offset, bool is_pointer, bool is_array, 
+                                  const std::vector<int>& array_dimensions) {
+    // Find the struct in the current scope
+    auto it = struct_scopes_.back().find(struct_name);
+    if (it != struct_scopes_.back().end()) {
+        // Create the member variable
+        Variable_s member;
+        member.type = type;
+        member.stack_offset = offset;
+        member.is_pointer = is_pointer;
+        member.is_array = is_array;
+        member.array_dimensions = array_dimensions;
+        
+        // Add it to the struct's member map
+        it->second[member_name] = member;
+    } else {
+        // Look for the struct in parent scopes
+        for (auto scope_it = struct_scopes_.rbegin() + 1; scope_it != struct_scopes_.rend(); ++scope_it) {
+            auto struct_it = scope_it->find(struct_name);
+            if (struct_it != scope_it->end()) {
+                // Create the member variable
+                Variable_s member;
+                member.type = type;
+                member.stack_offset = offset;
+                member.is_pointer = is_pointer;
+                member.is_array = is_array;
+                member.array_dimensions = array_dimensions;
+                
+                // Add it to the struct's member map
+                struct_it->second[member_name] = member;
+                return;
+            }
+        }
+        
+        throw std::runtime_error("Struct not found: " + struct_name);
+    }
+}
+
+Variable_s ScopeManager::GetStructMember(const std::string& struct_name, const std::string& member_name) const {
+    // Search for the struct in all scopes, starting from the innermost
+    for (auto scope_it = struct_scopes_.rbegin(); scope_it != struct_scopes_.rend(); ++scope_it) {
+        auto struct_it = scope_it->find(struct_name);
+        if (struct_it != scope_it->end()) {
+            // Found the struct, now look for the member
+            auto member_it = struct_it->second.find(member_name);
+            if (member_it != struct_it->second.end()) {
+                return member_it->second;
+            }
+        }
+    }
+    
+    throw std::runtime_error("Struct member not found: " + struct_name + "." + member_name);
+}
 
 Variable_s ScopeManager::GetVariable(const std::string& name) const {
     for (auto it = variable_scopes_.rbegin(); it != variable_scopes_.rend(); ++it) {
@@ -209,6 +269,12 @@ bool ScopeManager::FunctionExists(const std::string& name) const {
 }
 
 bool ScopeManager::StructExists(const std::string& name) const {
+    // Search for the struct in all scopes, starting from the innermost
+    for (auto it = struct_scopes_.rbegin(); it != struct_scopes_.rend(); ++it) {
+        if (it->find(name) != it->end()) {
+            return true;
+        }
+    }
     return false;
 }
 
@@ -229,6 +295,7 @@ int StackManager::DecrementFrameOffset(int bytes) {
     return frame_pointer_offset_;
 }
 
+// for variables only. not enums or structs
 int StackManager::AllocateStackAndLink(TypeSpecifier type, const std::string& id, bool is_ptr, bool is_array, const std::vector<int>& array_dimensions) {
     int bytes = 0;
     
@@ -256,33 +323,115 @@ int StackManager::AllocateStackAndLink(TypeSpecifier type, const std::string& id
     }
 }
 
-void StackManager::StoreRegisterToVariable(std::ostream& dst, const std::string& reg, const std::string& id) {
+void StackManager::StoreRegisterToVariable(std::ostream& dst, const std::string& reg, const std::string& id, bool is_ptr, bool is_array, const std::vector<int>& array_indices) {
     try {
         Variable_s var = context_->scope_manager.GetVariable(id);
+        int offset = var.stack_offset;
         
-        // TODO: add more logic to handle array access - need to calculate the correct offset
-        // based on the array index and element size, then add to the base address
+        // Handle array access with indices
+        if (is_array && !array_indices.empty()) {
+            if (!var.is_array) {
+                dst << "    # Error: Variable is not an array but array access attempted: " << id << std::endl;
+                return;
+            }
+            
+            // Calculate the byte offset based on indices
+            int element_size = Context::GetSizeOfType(var.type);
+            
+            // Debug information
+            dst << "    # STORE TO ARRAY: " << id << "[" << array_indices[0] << "] = " << reg << std::endl;
+            dst << "    # ELEMENT TYPE SIZE: " << element_size << " bytes" << std::endl;
+            
+            if (array_indices.size() == 1) {
+                int byte_offset = -array_indices[0] * element_size;
+                dst << "    # Calculating array element offset: index=" << array_indices[0] 
+                    << " * size=" << element_size << " = " << byte_offset << std::endl;
+                    
+                // Create the address calculation: base + index*element_size
+                std::string store_instruction = Context::GetStoreInstruction(var.type);
+                dst << "    # Array base offset: " << offset << std::endl;
+                dst << "    # Final offset: " << (offset + byte_offset) << std::endl;
+                dst << "    " << store_instruction << " " << reg << ", " << (offset + byte_offset) << "(s0)" << std::endl;
+                return;
+            }
+            // TODO: Handle multi-dimensional arrays
+        }
+        else if (is_ptr) {
+            // Pointer handling goes here
+            if (!var.is_pointer) {
+                dst << "    # Error: Variable is not a pointer but pointer access attempted: " << id << std::endl;
+                return;
+            }
+            
+            // TODO: Implement pointer store
+            dst << "    # Pointer store not yet implemented for: " << id << std::endl;
+            return;
+        }
         
+        // Default case - regular variable or pointer variable
         if (context_->scope_manager.InGlobalScope()) {
             dst << "    # Global variable store - needs implementation with %hi and %lo" << std::endl;
         } else {
             std::string store_instruction = Context::GetStoreInstruction(var.type);
-            dst << "    " << store_instruction << " " << reg << ", " << var.stack_offset << "(s0)" << std::endl;
+            dst << "    " << store_instruction << " " << reg << ", " << offset << "(s0)" << std::endl;
         }
     } catch (const std::runtime_error& e) {
         dst << "    # Error: Variable not found: " << id << std::endl;
     }
 }
 
-void StackManager::LoadVariableToRegister(std::ostream& dst, const std::string& reg, const std::string& id) {
+void StackManager::LoadVariableToRegister(std::ostream& dst, const std::string& reg, const std::string& id, bool is_ptr, bool is_array, const std::vector<int>& array_indices) {
     try {
         Variable_s var = context_->scope_manager.GetVariable(id);
+        int offset = var.stack_offset;
         
+        // Handle array access with indices
+        if (is_array && !array_indices.empty()) {
+            if (!var.is_array) {
+                dst << "    # Error: Variable is not an array but array access attempted: " << id << std::endl;
+                return;
+            }
+            
+            // Calculate the byte offset based on indices
+            int element_size = Context::GetSizeOfType(var.type);
+            
+            // Debug information
+            dst << "    # Array load: " << reg << " = " << id << "[" << array_indices[0] << "]" << std::endl;
+            dst << "    # Element size: " << element_size << " bytes" << std::endl;
+            
+            // For single-dimensional array access (handle multi-dimensional later)
+            if (array_indices.size() == 1) {
+                int byte_offset = array_indices[0] * element_size;
+                dst << "    # Calculating array element offset: index=" << array_indices[0] 
+                    << " * size=" << element_size << " = " << byte_offset << std::endl;
+                    
+                // Create the address calculation: base + index*element_size
+                std::string load_instruction = Context::GetLoadInstruction(var.type);
+                dst << "    # Array base offset: " << offset << std::endl;
+                dst << "    # Final offset: " << (offset + byte_offset) << std::endl;
+                dst << "    " << load_instruction << " " << reg << ", " << (offset + byte_offset) << "(s0)" << std::endl;
+                return;
+            }
+            // TODO: Handle multi-dimensional arrays
+        }
+        else if (is_ptr) {
+            // Pointer handling goes here
+            if (!var.is_pointer) {
+                dst << "    # Error: Variable is not a pointer but pointer access attempted: " << id << std::endl;
+                return;
+            }
+            
+            // TODO: Implement pointer load
+            dst << "    # Pointer load not yet implemented for: " << id << std::endl;
+            return;
+        }
+        
+        // Default case - regular variable or pointer variable
         if (context_->scope_manager.InGlobalScope()) {
             dst << "    # Global variable load - needs implementation with %hi and %lo" << std::endl;
         } else {
             std::string load_instruction = Context::GetLoadInstruction(var.type);
-            dst << "    " << load_instruction << " " << reg << ", " << var.stack_offset << "(s0)" << std::endl;
+            dst << "    " << load_instruction << " " << reg << ", " << offset << "(s0)" << std::endl;
         }
     } catch (const std::runtime_error& e) {
         dst << "    # Error: Variable not found: " << id << std::endl;

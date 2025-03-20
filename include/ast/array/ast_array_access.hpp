@@ -9,7 +9,7 @@
 
 namespace ast {
 
-class ArrayAccess : public Node 
+class ArrayAccess : public Node
 {
     public:
         ArrayAccess();
@@ -19,8 +19,8 @@ class ArrayAccess : public Node
         virtual void Print(std::ostream &stream, indent_t indent) const override;
 
     private:
-        NodePtr array_id_;  // The array identifier
-        NodePtr index_;     // The expression for the index
+        NodePtr array_id_;
+        NodePtr index_; 
 };
 
 } // namespace ast

@@ -15,4 +15,9 @@ void Integer::Print(std::ostream& stream, indent_t indent) const
     stream << value_;
 }
 
+int Integer::GetValue() const
+{
+    return value_;
+}
+
 } // namespace ast

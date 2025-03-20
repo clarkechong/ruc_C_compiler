@@ -31,8 +31,6 @@ void AddressOp::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Cont
         } else {
             stream << "    addi " << dst_reg << ", s0, " << var.stack_offset << std::endl;
         }
-    } else {
-        throw std::runtime_error("cannot take address of non-lvalue");
     }
 }
 

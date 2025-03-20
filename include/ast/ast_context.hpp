@@ -67,12 +67,13 @@ public:
     void AddFunction(const std::string& name, TypeSpecifier return_type, const std::vector<TypeSpecifier>& param_types);
     void AddEnum(const std::string& enum_name);
     void AddEnumValue(const std::string& enum_name, const std::string& value_name, int value);
-    // void AddStruct(const std::string& name, const std::map<std::string, TypeSpecifier>& members, int size);
-    // void AddStructMember(struct's name, member name, member type); // depends whether you construct the struct THEN add it, or add members individually
+    void AddStruct(const std::string& name);
+    void AddStructMember(const std::string& struct_name, const std::string& member_name, TypeSpecifier type, int offset, bool is_pointer = false, bool is_array = false, const std::vector<int>& array_dimensions = {});
     
     int GetEnumValue(const std::string& enum_name, const std::string& value_name) const;
     Variable_s GetVariable(const std::string& name) const;
     Function_s GetFunction(const std::string& name) const;
+    Variable_s GetStructMember(const std::string& struct_name, const std::string& member_name) const;
     
     bool VariableExists(const std::string& name) const;
     bool FunctionExists(const std::string& name) const;
@@ -82,7 +83,7 @@ private:
     Context* context_;
     
     std::vector<std::unordered_map<std::string, Variable_s>> variable_scopes_;
-    std::vector<std::unordered_map<std::string, std::map<std::string, Variable_s>>> struct_table_;
+    std::vector<std::unordered_map<std::string, std::map<std::string, Variable_s>>> struct_scopes_;
 
     std::unordered_map<std::string, Function_s> function_table_;
     std::unordered_map<std::string, std::map<std::string, int>> enum_table_;
@@ -98,8 +99,8 @@ public:
     int AllocateStackAndLink(TypeSpecifier type, const std::string& id, bool is_ptr = false, bool is_array = false, const std::vector<int>& array_dimensions = {});
     void InitiateFrame(std::ostream& dst);
     void TerminateFrame(std::ostream& dst);
-    void StoreRegisterToVariable(std::ostream& dst, const std::string& reg, const std::string& id);
-    void LoadVariableToRegister(std::ostream& dst, const std::string& reg, const std::string& id);
+    void StoreRegisterToVariable(std::ostream& dst, const std::string& reg, const std::string& id, bool is_ptr = false, bool is_array = false, const std::vector<int>& array_indices = {});
+    void LoadVariableToRegister(std::ostream& dst, const std::string& reg, const std::string& id, bool is_ptr = false, bool is_array = false, const std::vector<int>& array_indices = {});
 
     void ResetFrameOffset();
     

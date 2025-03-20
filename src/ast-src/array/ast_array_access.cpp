@@ -1,4 +1,5 @@
 #include "ast/array/ast_array_access.hpp"
+#include "ast/primary/ast_identifier.hpp"
 
 namespace ast {
 
@@ -18,6 +19,7 @@ void ArrayAccess::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Co
 
 void ArrayAccess::Print(std::ostream& stream, indent_t indent) const 
 {
+
 }
 
 } // namespace ast
