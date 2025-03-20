@@ -16,9 +16,7 @@ int main(int argc, char** argv) {
     ast::Context context;
 
     auto root = ParseAST(argv[1]);
-    // root->Print(std::cout, 0);
-    // std::cout<<std::endl<<std::endl;
-    root->EmitRISCV(std::cout, "a5", context);
+    root->EmitRISCV(std::cout, "a0", context);
 
     return 0;
     

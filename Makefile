@@ -60,6 +60,13 @@ bin/c_compiler: ${OBJECTS} build/compiler.o
 	@echo "MAIN: Building $@ with all objects linked"
 	@g++ ${CPPFLAGS} -MMD -MP $^ -o $@
 
+coverage:
+	@rm -rf coverage/
+	@mkdir -p coverage
+	lcov -c --no-external --exclude "`pwd`/src/lexer.*" --exclude "`pwd`/src/parser.*" --exclude "`pwd`/build/*" -d . -o coverage/cov.info
+	genhtml coverage/cov.info -o coverage
+	@find . -name "*.gcda" -delete
+
 clean:
 	rm -rf src/generated/*
 	rm -rf build/*

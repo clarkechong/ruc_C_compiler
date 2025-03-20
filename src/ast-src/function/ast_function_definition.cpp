@@ -13,35 +13,64 @@ FunctionDefinition::FunctionDefinition(NodePtr declaration_specifiers, NodePtr d
 }
 
 void FunctionDefinition::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context& context) const 
-{    
-    /*
-        new scope, reset everything
-        << ".section .text" 
-        << .globl <id> 
-        << .type <id>, @function
-    */
+{
+    Declarator* decl = dynamic_cast<Declarator*>(declarator_.get());
+    std::string func_name = decl->GetID();
 
-    auto func_declarator = dynamic_cast<const FunctionDeclarator*>(declarator_.get());
-    if (func_declarator) {
-        std::string function_name = func_declarator->GetID();
-        stream << ".text" << std::endl;
-        stream << ".globl " << function_name << std::endl;
-        stream << ".type " << function_name << ", @function" << std::endl;
-        stream << function_name << ":" << std::endl;
-        compound_statement_->EmitRISCV(stream, dst_reg, context);
-        stream << "ret" << std::endl;
+    DeclarationType* type = dynamic_cast<DeclarationType*>(declaration_specifiers_.get());
+    TypeSpecifier return_type = type->GetType();
+
+    std::string return_reg = context.register_manager.AllocateReturnRegister(return_type == TypeSpecifier::DOUBLE || return_type == TypeSpecifier::FLOAT);
+    
+    context.register_manager.ResetRegisters();
+    context.stack_manager.ResetFrameOffset();
+    
+    // push function context (for return statements)
+    context.label_manager.PushFunctionContext(func_name);
+    std::string end_label = context.label_manager.GetCurrentFunctionEndLabel();
+    
+    stream << "    .text\n";
+    stream << "    .globl " << func_name << "\n";
+    stream << "    .type " << func_name << ", @function\n\n";
+    
+    // the declarator handles printing the function start label
+    if (declarator_) { // there should always be a FunctionDeclarator for a function definition...
+        declarator_->EmitRISCV(stream, return_reg, context);
     }
+    
+    if (compound_statement_) {
+        compound_statement_->EmitRISCV(stream, return_reg, context);
+    }
+    
+    stream << end_label << ":\n";
+    context.scope_manager.ExitScope();
+    context.stack_manager.TerminateFrame(stream);
+    stream << "    ret\n\n";
+    
+    context.label_manager.EmitDataSection(stream); // work out if this needs to be done?
+    
+    // pop function context
+    context.label_manager.PopFunctionContext();
 }
 
 void FunctionDefinition::Print(std::ostream& stream, indent_t indent) const 
 {
-    stream << indent; 
-    declaration_specifiers_->Print(stream, 0);
-    stream << " ";
-    declarator_->Print(stream, 0);
-    stream << std::endl;
-
-    compound_statement_->Print(stream, indent);
+    if (declaration_specifiers_) {
+        declaration_specifiers_->Print(stream, indent);
+        stream << " ";
+    }
+    
+    if (declarator_) {
+        declarator_->Print(stream, indent);
+    }
+    
+    // stream << " {\n";
+        
+    if (compound_statement_) {
+        compound_statement_->Print(stream, indent++);
+    }
+    
+    // stream << indent << "}\n";
 }
 
 } // namespace ast

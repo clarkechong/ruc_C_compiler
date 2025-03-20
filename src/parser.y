@@ -1,11 +1,16 @@
 %code requires{
     #include "ast.hpp"
+	#include <unordered_map>
 	
 	using namespace ast;
 
     extern Node* g_root;
     extern FILE* yyin;
-
+    
+    // Declare external variables for typedef handling
+    extern std::unordered_map<std::string, TypeSpecifier> type_map;
+    void update_type_map(const std::string& id, TypeSpecifier type);
+    
     int yylex(void);
 	int yylex_destroy(void);
     void yyerror(const char*);
@@ -96,7 +101,7 @@ primary_expression
 
 postfix_expression
 	: primary_expression									{ $$ = $1; }
-	| postfix_expression '[' expression ']'					{ $$ = new ArrayAccess(NodePtr($1), NodePtr($3)); }
+	| postfix_expression '[' expression ']'					{ $$ = new ArrayDeclarator(NodePtr($1), NodePtr($3)); }
 	| postfix_expression '(' ')'							{ $$ = new FunctionCall(NodePtr($1), nullptr); }
 	| postfix_expression '(' argument_expression_list ')'	{ $$ = new FunctionCall(NodePtr($1), NodePtr($3)); }
 	| postfix_expression '.' IDENTIFIER						{ /* Struct member access */ }
@@ -228,6 +233,24 @@ constant_expression
 declaration
 	: declaration_specifiers ';'						{ $$ = new Declaration(NodePtr($1), nullptr); }
 	| declaration_specifiers init_declarator ';'		{ $$ = new Declaration(NodePtr($1), NodePtr($2)); }
+	| typedef_declaration ';'							{ $$ = nullptr; /* Skip typedef in AST */ }
+	;
+
+typedef_declaration
+	: TYPEDEF type_specifier IDENTIFIER 
+		{ 
+			if (auto type_node = dynamic_cast<DeclarationType*>($2)) {
+				update_type_map(*$3, type_node->GetType()); 
+			}
+		}
+	| TYPEDEF type_specifier '*' IDENTIFIER 
+		{ 
+			if (auto type_node = dynamic_cast<DeclarationType*>($2)) {
+				// For now, just store the base type. In a real implementation
+				// we'd need to handle pointer types properly
+				update_type_map(*$4, type_node->GetType()); 
+			}
+		}
 	;
 
 declaration_specifiers // only considering single types
@@ -247,7 +270,7 @@ declaration_specifiers // only considering single types
 
 init_declarator
 	: declarator					{ $$ = $1; }
-	| declarator '=' initializer	{ /* Add initializer to declarator */ }
+	| declarator '=' initializer	{ $$ = new InitDeclarator(NodePtr($1), NodePtr($3)); }
 	;
 
 // storage_class_specifier
@@ -270,7 +293,10 @@ type_specifier
 	| UNSIGNED				{ $$ = new DeclarationType(TypeSpecifier::UNSIGNED_INT); }
 	| struct_specifier		{ $$ = $1; }
 	| enum_specifier		{ $$ = $1; }
-	| TYPE_NAME				{ /* Type name from typedef */ }
+	| TYPE_NAME				{ 
+		TypeSpecifier type = type_map[*yylval.string];
+		$$ = new DeclarationType(type);
+	}
 	;
 
 struct_specifier
@@ -300,8 +326,8 @@ struct_declarator_list
 
 struct_declarator
 	: declarator											{ $$ = $1; }
-	| ':' constant_expression								{ /* Bit field */ }
-	| declarator ':' constant_expression					{ /* Named bit field */ }
+	| ':' constant_expression								{ } // ignore
+	| declarator ':' constant_expression					{ } // ignore
 	;
 
 enum_specifier
@@ -333,8 +359,8 @@ declarator
 direct_declarator
 	: IDENTIFIER										{ $$ = new Identifier(*$1); } // new Identifier
 	| '(' declarator ')' 								{ $$ = $2; }	// { /* $$ = std::move($2) */ }
-	| direct_declarator '[' constant_expression ']' 	{ $$ = new ArrayDeclarator(); /* Array with size */ }
-	| direct_declarator '[' ']' 						{ $$ = new ArrayDeclarator(); /* Array without size */ }
+	| direct_declarator '[' constant_expression ']' 	{ $$ = new ArrayDeclarator(NodePtr($1), NodePtr($3)); /* Array with size */ }
+	| direct_declarator '[' ']' 						{ $$ = new ArrayDeclarator(NodePtr($1), nullptr); /* Array without size */ }
 	| direct_declarator '(' parameter_list ')'			{ $$ = new FunctionDeclarator(NodePtr($1), NodePtr($3)); /* Function with parameters */ }
 	| direct_declarator '(' ')'							{ $$ = new FunctionDeclarator(NodePtr($1), nullptr); /* Function without parameters */ }
 	// | direct_declarator '(' identifier_list ')' // OLD K&R STYLE
@@ -342,7 +368,7 @@ direct_declarator
 
 pointer
 	: '*'			{ $$ = new Pointer(); }
-	| '*' pointer	{ $$ = new Pointer(); /* Nested pointers */ }
+	| '*' pointer	{ $$ = new Pointer(); /* nested pointer */ }
 	// | '*' type_qualifier_list
 	// | '*' type_qualifier_list pointer
 	;
@@ -364,9 +390,9 @@ parameter_list
 	;
 
 parameter_declaration
-	: declaration_specifiers declarator					{ $$ = new Declaration(NodePtr($1), NodePtr($2)); }
-	| declaration_specifiers abstract_declarator		{ /* Parameter with abstract declarator */ }
-	| declaration_specifiers							{ /* Parameter with type only */ }
+	: declaration_specifiers declarator					{ $$ = new FunctionParameter(NodePtr($1), NodePtr($2)); }
+	| declaration_specifiers abstract_declarator		{ /* Parameter with abstract declarator */ } // ignore
+	| declaration_specifiers							{ /* Parameter with type only */ } // OLD K&R STYLE IGNORE FOR NOW. 
 	;
 
 // NO LONGER REQURIED AS ONLY USED WITHIN K&R STYLE (DIRECT DECLARATOR) FUNCTION DECLARATION
@@ -380,12 +406,14 @@ type_name
 	| specifier_qualifier_list abstract_declarator		{ /* Type with abstract declarator */ }
 	;
 
+// CAN BE IGNORED
 abstract_declarator
 	: pointer								{ $$ = $1; }
 	| direct_abstract_declarator			{ $$ = $1; }
 	| pointer direct_abstract_declarator	{ /* Pointer to abstract declarator */ }
 	;
 
+// CAN BE IGNORED
 direct_abstract_declarator
 	: '(' abstract_declarator ')'								{ $$ = $2; }
 	| '[' ']'													{ /* Array type */ }
@@ -419,9 +447,9 @@ statement
 	;
 
 labeled_statement
-	: IDENTIFIER ':' statement					{ /* Labeled statement */ }
-	| CASE constant_expression ':' statement	{ /* Case statement */ }
-	| DEFAULT ':' statement						{ /* Default case */ }
+	: IDENTIFIER ':' statement					{ /* Labeled statement - not implemented */ }
+	| CASE constant_expression ':' statement	{ $$ = new Case(NodePtr($2), NodePtr($4)); }
+	| DEFAULT ':' statement						{ $$ = new Default(NodePtr($3)); }
 	;
 
 compound_statement // compound statement = block = scope
@@ -449,7 +477,7 @@ expression_statement
 selection_statement
 	: IF '(' expression ')' statement						{ $$ = new IfElse(NodePtr($3), NodePtr($5), nullptr); /* Set condition and true branch */ }
 	| IF '(' expression ')' statement ELSE statement		{ $$ = new IfElse(NodePtr($3), NodePtr($5), NodePtr($7)); /* Set condition, true and false branches */ }
-	| SWITCH '(' expression ')' statement					{ $$ = new Switch(); /* Set expression and cases */ }
+	| SWITCH '(' expression ')' statement					{ $$ = new Switch(NodePtr($3), NodePtr($5)); /* Set expression and body containing cases */ }
 	;
 
 iteration_statement

@@ -1,11 +1,7 @@
-// int main() {
-//     return 25.5;    // float
-//     return 10;      // integer
-//     return "hello"; // string
-//     return '\\';    // char
-//     return hello;   // identifier
-// }
-
-int fUCKINGFUNCTIONSZZZZZZZ(int x, int y) {
-    return 5;
+int f()
+{
+    int i = 5;
+    int acc;
+    acc = acc + i;
+    return 0;
 }

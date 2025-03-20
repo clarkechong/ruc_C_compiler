@@ -10,6 +10,7 @@
 #include "ast/ast_context.hpp"
 #include "ast/ast_declaration.hpp"
 #include "ast/ast_declarator.hpp"
+#include "ast/ast_init_declarator.hpp"
 #include "ast/ast_node.hpp"
 #include "ast/ast_nodelist.hpp"
 
@@ -30,6 +31,7 @@
 #include "ast/function/ast_function_call.hpp"
 #include "ast/function/ast_function_declarator.hpp"
 #include "ast/function/ast_function_definition.hpp"
+#include "ast/function/ast_function_parameter.hpp"
 
 #include "ast/operator/ast_assign.hpp"
 #include "ast/operator/ast_binary_operator.hpp"

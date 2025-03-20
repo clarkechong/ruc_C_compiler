@@ -14,33 +14,36 @@ Scope::Scope(NodePtr declaration_list, NodePtr statement_list)
 
 void Scope::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context& context) const 
 {
-    // Process declarations first
+    context.scope_manager.EnterNewScope();
+    
     if (declaration_list_) {
         declaration_list_->EmitRISCV(stream, dst_reg, context);
     }
     
-    // Process statements
     if (statement_list_) {
         statement_list_->EmitRISCV(stream, dst_reg, context);
     }
+    
+    if (!statement_list_ || (statement_list_ && !dst_reg.empty() && dst_reg == "a0")) {
+        stream << "    li a0, 0    # default return value for empty scope\n";
+    }
+    
+    context.scope_manager.ExitScope();
 }
 
 void Scope::Print(std::ostream& stream, indent_t indent) const 
 {
-    stream << indent << "{" << std::endl;
-    
-    indent_t inner_indent = indent;
-    inner_indent++;
+    stream << "{\n";
     
     if (declaration_list_) {
-        declaration_list_->Print(stream, inner_indent);
+        declaration_list_->Print(stream, indent++);
     }
     
     if (statement_list_) {
-        statement_list_->Print(stream, inner_indent);
+        statement_list_->Print(stream, indent);
     }
     
-    stream << indent << "}" << std::endl;
+    stream << "}\n";
 }
 
 } // namespace ast

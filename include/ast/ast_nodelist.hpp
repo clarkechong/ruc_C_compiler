@@ -16,10 +16,11 @@ class NodeList : public Node
 
         virtual void EmitRISCV(std::ostream &stream, const std::string &dst_reg, Context &context) const override;
         virtual void Print(std::ostream &stream, indent_t indent) const override;
-        void PrintParameters(std::ostream &stream) const;
 
         virtual void Push(NodePtr node);
         virtual int GetNodeCount() const;
+        
+        const std::vector<NodePtr>& GetChildren() const { return nodes_; }
 
     private:
         std::vector<NodePtr> nodes_;

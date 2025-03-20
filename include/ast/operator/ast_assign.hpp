@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "ast/ast_node.hpp"
+#include "ast/ast_declarator.hpp"
 #include "ast/ast_context.hpp"
 #include "ast/operator/ast_binary_operator.hpp"
 

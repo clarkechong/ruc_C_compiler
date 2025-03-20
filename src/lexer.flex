@@ -1,8 +1,21 @@
 %{
   #include "parser.tab.hpp"
+  #include <unordered_map>
+  #include "ast/type/ast_declaration_type.hpp"
 
-  // extern "C" int fileno(FILE *stream);
-  // [[maybe_unused]] static void yyunput (int c, char * yy_bp );
+  // LEXER HACK cus everybodys done it...
+  std::unordered_map<std::string, ast::TypeSpecifier> type_map;
+
+  void update_type_map(const std::string& id, ast::TypeSpecifier type) {
+    type_map[id] = type;
+  }
+
+  int check_type_map(const std::string& id) {
+    if (type_map.find(id) != type_map.end()) {
+      return TYPE_NAME;
+    }
+    return IDENTIFIER;
+  }
 %}
 
 D	  [0-9]
@@ -17,9 +30,9 @@ IS  (u|U|l|L)*
 %%
 
 "/*"                { BEGIN COMMENT; }
-<COMMENT>[^*/]+     { /* ignore anything that is not '*' or '/' */ }
+<COMMENT>[^*/]+     { /* ignore anything not '*' or '/' */ }
 <COMMENT>("*"+)"/"  { BEGIN INITIAL; }
-<COMMENT>[*/]       { /* residual stuff, if required */ }
+<COMMENT>[*/]       { }
 
 "//"[^\n]*"\n"      { /* single line comment */ }
 
@@ -56,7 +69,7 @@ IS  (u|U|l|L)*
 "volatile"	{return(VOLATILE);}
 "while"			{return(WHILE);}
 
-{L}({L}|{D})*		        {yylval.string = new std::string(yytext); return(IDENTIFIER);}
+{L}({L}|{D})*		        {yylval.string = new std::string(yytext); return(check_type_map(*yylval.string));}
 
 0[xX]{H}+{IS}?		      {yylval.number_int = (int)strtol(yytext, NULL, 0); return(INT_CONSTANT);}
 0{D}+{IS}?		          {yylval.number_int = (int)strtol(yytext, NULL, 0); return(INT_CONSTANT);}

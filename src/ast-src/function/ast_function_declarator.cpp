@@ -1,5 +1,5 @@
 #include "ast/function/ast_function_declarator.hpp"
-#include "ast/ast_nodelist.hpp"
+#include "ast/ast_declarator.hpp"
 
 namespace ast {
 
@@ -15,23 +15,43 @@ FunctionDeclarator::FunctionDeclarator(NodePtr direct_declarator, NodePtr parame
 
 void FunctionDeclarator::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context& context) const 
 {
-    // The function label is now handled by FunctionDefinition
+    std::string func_name = GetID();
+    
+    TypeSpecifier return_type = TypeSpecifier::INT; // default to int for now but really should be queried. OR... DO WE EVEN NEED THE FUNCTION RETURN TYPE?
+    
+    std::vector<TypeSpecifier> param_types;
+    if (parameter_list_) {
+        /*
+            FOR I IN PARAMETER LIST:
+            PUSH BACK PARAMETER -> TYPESPECIFIER
+            obviously not yet implemented
+        */
+        param_types.push_back(TypeSpecifier::INT); // in future implement parameter_declaration node type, which can extract typespecifier from parameters
+    }
+    
+    context.scope_manager.AddFunction(func_name, return_type, param_types);
+    
+    stream << func_name << ":\n";
+    context.stack_manager.InitiateFrame(stream);
+    context.scope_manager.EnterNewScope();
+    
+    if (parameter_list_) {
+        parameter_list_->EmitRISCV(stream, dst_reg, context); // the parameters retrieve themselves from a0-a7 or whatever, then LOAD TO STACK with their id!!!
+    }
 }
 
 void FunctionDeclarator::Print(std::ostream& stream, indent_t indent) const 
 {
-    direct_declarator_->Print(stream, indent_t(0));
-    stream << "(";
-    if (parameter_list_)
-    {
-        // Cast to NodeList and use PrintParameters
-        NodeList* params = dynamic_cast<NodeList*>(parameter_list_.get());
-        if (params) {
-            params->PrintParameters(stream);
-        } else {
-            parameter_list_->Print(stream, indent_t(0));
-        }
+    if (direct_declarator_) {
+        direct_declarator_->Print(stream, indent);
     }
+    
+    stream << "(";
+    
+    if (parameter_list_) {
+        parameter_list_->Print(stream, indent);
+    }
+    
     stream << ")";
 }
 
