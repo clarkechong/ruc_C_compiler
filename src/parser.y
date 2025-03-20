@@ -1,11 +1,16 @@
 %code requires{
     #include "ast.hpp"
+	#include <unordered_map>
 	
 	using namespace ast;
 
     extern Node* g_root;
     extern FILE* yyin;
-
+    
+    // Declare external variables for typedef handling
+    extern std::unordered_map<std::string, TypeSpecifier> type_map;
+    void update_type_map(const std::string& id, TypeSpecifier type);
+    
     int yylex(void);
 	int yylex_destroy(void);
     void yyerror(const char*);
@@ -228,6 +233,24 @@ constant_expression
 declaration
 	: declaration_specifiers ';'						{ $$ = new Declaration(NodePtr($1), nullptr); }
 	| declaration_specifiers init_declarator ';'		{ $$ = new Declaration(NodePtr($1), NodePtr($2)); }
+	| typedef_declaration ';'							{ $$ = nullptr; /* Skip typedef in AST */ }
+	;
+
+typedef_declaration
+	: TYPEDEF type_specifier IDENTIFIER 
+		{ 
+			if (auto type_node = dynamic_cast<DeclarationType*>($2)) {
+				update_type_map(*$3, type_node->GetType()); 
+			}
+		}
+	| TYPEDEF type_specifier '*' IDENTIFIER 
+		{ 
+			if (auto type_node = dynamic_cast<DeclarationType*>($2)) {
+				// For now, just store the base type. In a real implementation
+				// we'd need to handle pointer types properly
+				update_type_map(*$4, type_node->GetType()); 
+			}
+		}
 	;
 
 declaration_specifiers // only considering single types
@@ -270,7 +293,10 @@ type_specifier
 	| UNSIGNED				{ $$ = new DeclarationType(TypeSpecifier::UNSIGNED_INT); }
 	| struct_specifier		{ $$ = $1; }
 	| enum_specifier		{ $$ = $1; }
-	| TYPE_NAME				{ /* Type name from typedef */ }
+	| TYPE_NAME				{ 
+		TypeSpecifier type = type_map[*yylval.string];
+		$$ = new DeclarationType(type);
+	}
 	;
 
 struct_specifier
