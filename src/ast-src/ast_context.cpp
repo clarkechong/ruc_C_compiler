@@ -223,11 +223,73 @@ StackManager::~StackManager() {
 }
 
 // RETURN THE NEW STACK POINTER OFFSET WHILST UR AT IT MATE
-int StackManager::AllocateStackSpace(std::ostream& dst, int bytes) {
+int StackManager::IncrementStackOffset(int bytes) {
     int aligned_size = (bytes + min_alignment_ - 1) & ~(min_alignment_ - 1);
-    stack_pointer_offset_ -= aligned_size;
-    dst << "    addi sp, sp, -" << aligned_size << std::endl;
+    stack_pointer_offset_ += aligned_size;
     return stack_pointer_offset_;
+}
+
+int StackManager::AllocateStackAndLink(TypeSpecifier type, const std::string& id, bool is_ptr, bool is_array, const std::vector<int>& array_dimensions) {
+    int bytes = 0;
+    
+    if (is_array) {
+        int multiplier = 1;
+        for (int dim : array_dimensions) {
+            multiplier *= dim;
+        }
+        bytes = Context::GetSizeOfType(type) * multiplier;
+        int stack_offset = IncrementStackOffset(bytes);
+        context_->scope_manager.AddArray(id, type, array_dimensions, stack_offset);
+        return stack_offset;
+    } 
+    else if (is_ptr) {
+        bytes = 4;
+        int stack_offset = IncrementStackOffset(bytes);
+        context_->scope_manager.AddPointer(id, type, stack_offset);
+        return stack_offset;
+    } 
+    else {
+        bytes = Context::GetSizeOfType(type);
+        int stack_offset = IncrementStackOffset(bytes);
+        context_->scope_manager.AddVariable(id, type, stack_offset);
+        return stack_offset;
+    }
+}
+
+void StackManager::StoreRegisterToVariable(std::ostream& dst, const std::string& reg, const std::string& id) {
+    try {
+        Variable_s var = context_->scope_manager.GetVariable(id);
+        
+        if (context_->scope_manager.InGlobalScope()) {
+            // This is a global variable, needs %hi and %lo for addressing
+            // For now just note that we need different addressing for globals
+            // dst << "    la t0, " << id << std::endl;
+            // dst << "    " << Context::GetStoreInstruction(var.type) << " " << reg << ", 0(t0)" << std::endl;
+            dst << "    # Global variable store - needs implementation with %hi and %lo" << std::endl;
+        } else {
+            // This is a local variable, use stack offset or frame pointer
+            std::string store_instruction = Context::GetStoreInstruction(var.type);
+            dst << "    " << store_instruction << " " << reg << ", " << var.stack_offset << "(sp)" << std::endl;
+        }
+    } catch (const std::runtime_error& e) {
+        dst << "    # Error: Variable not found: " << id << std::endl;
+    }
+}
+
+void StackManager::LoadVariableToRegister(std::ostream& dst, const std::string& reg, const std::string& id) {
+    try {
+        Variable_s var = context_->scope_manager.GetVariable(id);
+        
+        if (context_->scope_manager.InGlobalScope()) {
+            // this is a global variable, needs %hi and %lo for addressing
+            dst << "    # Global variable load - needs implementation with %hi and %lo" << std::endl;
+        } else {
+            std::string load_instruction = Context::GetLoadInstruction(var.type);
+            dst << "    " << load_instruction << " " << reg << ", " << var.stack_offset << "(sp)" << std::endl;
+        }
+    } catch (const std::runtime_error& e) {
+        dst << "    # Error: Variable not found: " << id << std::endl;
+    }
 }
 
 // ONLY INITIATE FRAME WHEN A FUNCTION CALL OCCURS. UNNECESSARY TO INITIATE FRAME FOR EVERY SCOPE
@@ -461,16 +523,30 @@ std::string RegisterManager::AllocateReturnRegister(bool is_float) {
     }
 }
 
-std::string RegisterManager::AllocateArgumentRegister(int arg_num, bool is_float) {
-    if (arg_num < 0 || arg_num > 7) {
-        throw std::runtime_error("Invalid argument number: " + std::to_string(arg_num));
+std::string RegisterManager::AllocateArgumentRegister(bool is_float) {
+    if (is_float) {
+        for (int i = 0; i <= 7; ++i) {
+            std::string register_name = "fa" + std::to_string(i);
+            int reg_index = 10 + i; // fa0-fa7 are mapped to regs 10-17
+            
+            if (regs_float_[reg_index] == 0) {
+                regs_float_[reg_index] = 1;
+                return register_name;
+            }
+        }
+    } else {
+        for (int i = 0; i <= 7; ++i) {
+            std::string register_name = "a" + std::to_string(i);
+            int reg_index = 10 + i; // a0-a7 are mapped to regs 10-17
+            
+            if (regs_[reg_index] == 0) {
+                regs_[reg_index] = 1;
+                return register_name;
+            }
+        }
     }
     
-    if (is_float) {
-        return "fa" + std::to_string(arg_num);
-    } else {
-        return "a" + std::to_string(arg_num);
-    }
+    throw std::runtime_error("No available argument registers. all been taken or some shit. who knows.");
 }
 
 void RegisterManager::DeallocateRegister(const std::string& reg) {
@@ -497,7 +573,7 @@ void RegisterManager::SpillRegister(const std::string& reg, std::ostream& dst) {
     
     bool is_float = (reg[0] == 'f');
     
-    int stack_offset = context_->stack_manager.AllocateStackSpace(dst, (is_float ? 8 : 4));
+    int stack_offset = context_->stack_manager.IncrementStackOffset((is_float ? 8 : 4));
     
     SpilledRegister spilled;
     spilled.reg_name = reg;
@@ -539,7 +615,7 @@ void RegisterManager::PushRegisters(std::ostream& dst) {
         if (regs_[i] == 1 && i >= 5) {
             SavedRegister saved;
             saved.reg_name = "x" + std::to_string(i);
-            saved.stack_offset = context_->stack_manager.AllocateStackSpace(dst, (4));
+            saved.stack_offset = context_->stack_manager.IncrementStackOffset(4);
             saved.is_float = false;
             
             saved_registers_.push_back(saved);
@@ -552,7 +628,7 @@ void RegisterManager::PushRegisters(std::ostream& dst) {
         if (regs_float_[i] == 1) {
             SavedRegister saved;
             saved.reg_name = "f" + std::to_string(i);
-            saved.stack_offset = context_->stack_manager.AllocateStackSpace(dst, (8));
+            saved.stack_offset = context_->stack_manager.IncrementStackOffset(8);
             saved.is_float = true;
             
             saved_registers_.push_back(saved);

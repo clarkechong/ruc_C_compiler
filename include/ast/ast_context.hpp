@@ -94,9 +94,12 @@ public:
     StackManager(Context* context);
     ~StackManager();
     
-    int AllocateStackSpace(std::ostream& dst, int bytes); // returns the stack pointer offset after new allocation
+    int IncrementStackOffset(int bytes); // returns the stack pointer offset after new allocation
+    int AllocateStackAndLink(TypeSpecifier type, const std::string& id, bool is_ptr = false, bool is_array = false, const std::vector<int>& array_dimensions = {});
     void InitiateFrame(std::ostream& dst);
     void TerminateFrame(std::ostream& dst);
+    void StoreRegisterToVariable(std::ostream& dst, const std::string& reg, const std::string& id);
+    void LoadVariableToRegister(std::ostream& dst, const std::string& reg, const std::string& id);
 
     void ResetStackPointerOffset();
     
@@ -165,7 +168,7 @@ public:
     
     std::string AllocateRegister(bool is_float = false);
     std::string AllocateReturnRegister(bool is_float = false);
-    std::string AllocateArgumentRegister(int arg_num, bool is_float = false);
+    std::string AllocateArgumentRegister(bool is_float = false);
 
     void DeallocateRegister(const std::string& reg);
     void SpillRegister(const std::string& reg, std::ostream& dst);

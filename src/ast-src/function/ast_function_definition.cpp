@@ -23,8 +23,7 @@ void FunctionDefinition::EmitRISCV(std::ostream& stream, const std::string& dst_
     std::string func_name = decl->GetID();
     
     context.register_manager.ResetRegisters();
-    context.stack_manager.ResetStackPointer();
-    context.stack_manager.ResetFramePointer();
+    context.stack_manager.ResetStackPointerOffset();
     
     // push function context (for return statements)
     context.label_manager.PushFunctionContext(func_name);
@@ -34,8 +33,8 @@ void FunctionDefinition::EmitRISCV(std::ostream& stream, const std::string& dst_
     stream << "    .globl " << func_name << "\n";
     stream << "    .type " << func_name << ", @function\n\n";
     
-    // emit function declarator - this will create function label and setup stack
-    if (declarator_) {
+    // the declarator handles printing the function start label
+    if (declarator_) { // there should always be a FunctionDeclarator for a function definition...
         declarator_->EmitRISCV(stream, dst_reg, context);
     }
     
@@ -43,12 +42,13 @@ void FunctionDefinition::EmitRISCV(std::ostream& stream, const std::string& dst_
         compound_statement_->EmitRISCV(stream, dst_reg, context);
     }
     
-    // Function epilogue is where all return statements jump to
+    // end label and function cleanup
     stream << end_label << ":\n";
+    context.scope_manager.ExitScope(stream);
     context.stack_manager.TerminateFrame(stream);
     stream << "    ret\n\n";
     
-    context.label_manager.EmitDataSection(stream);
+    context.label_manager.EmitDataSection(stream); // work out if this needs to be done?
     
     // pop function context
     context.label_manager.PopFunctionContext();

@@ -5,6 +5,8 @@
 #include <vector>
 
 #include "ast/ast_node.hpp"
+#include "ast/ast_declarator.hpp"
+#include "ast/type/ast_declaration_type.hpp"
 #include "ast/ast_context.hpp"
 
 namespace ast {

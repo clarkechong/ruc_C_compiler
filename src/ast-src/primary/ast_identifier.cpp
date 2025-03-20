@@ -3,11 +3,13 @@
 namespace ast {
 
 Identifier::Identifier(std::string id) : id_(id) {
-    // std::cout << id_;
 }
 
 void Identifier::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context& context) const 
 {
+    if (context.scope_manager.VariableExists(id_)) {
+        context.stack_manager.LoadVariableToRegister(stream, dst_reg, id_);
+    }
 }
 
 void Identifier::Print(std::ostream& stream, indent_t indent) const 

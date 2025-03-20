@@ -5,27 +5,23 @@
 #include <vector>
 
 #include "ast/ast_node.hpp"
+#include "ast/type/ast_declaration_type.hpp"
 #include "ast/ast_context.hpp"
 
 namespace ast {
 
-class NodeList : public Node 
+class FunctionParameter : public Node 
 {
     public:
-        NodeList(NodePtr first_node);
+        FunctionParameter(NodePtr type, NodePtr declarator);
 
         virtual void EmitRISCV(std::ostream &stream, const std::string &dst_reg, Context &context) const override;
         virtual void Print(std::ostream &stream, indent_t indent) const override;
 
-        virtual void Push(NodePtr node);
-        virtual int GetNodeCount() const;
-        
-        const std::vector<NodePtr>& GetChildren() const { return nodes_; }
 
     private:
-        std::vector<NodePtr> nodes_;
+        NodePtr type_;
+        NodePtr declarator_; // probably just class Identifier
 };
-
-using NodeListPtr = std::unique_ptr<NodeList>;
 
 } // namespace ast

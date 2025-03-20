@@ -17,21 +17,26 @@ void FunctionDeclarator::EmitRISCV(std::ostream& stream, const std::string& dst_
 {
     std::string func_name = GetID();
     
-    TypeSpecifier return_type = TypeSpecifier::INT;
+    TypeSpecifier return_type = TypeSpecifier::INT; // default to int for now but really should be queried. OR... DO WE EVEN NEED THE FUNCTION RETURN TYPE?
     
     std::vector<TypeSpecifier> param_types;
     if (parameter_list_) {
+        /*
+            FOR I IN PARAMETER LIST:
+            PUSH BACK PARAMETER -> TYPESPECIFIER
+            obviously not yet implemented
+        */
         param_types.push_back(TypeSpecifier::INT); // in future implement parameter_declaration node type, which can extract typespecifier from parameters
     }
     
     context.scope_manager.AddFunction(func_name, return_type, param_types);
     
     stream << func_name << ":\n";
-    
     context.stack_manager.InitiateFrame(stream);
+    context.scope_manager.EnterNewScope();
     
     if (parameter_list_) {
-        parameter_list_->EmitRISCV(stream, dst_reg, context);
+        parameter_list_->EmitRISCV(stream, dst_reg, context); // the parameters retrieve themselves from a0-a7 or whatever, then LOAD TO STACK with their id!!!
     }
 }
 

@@ -364,9 +364,9 @@ parameter_list
 	;
 
 parameter_declaration
-	: declaration_specifiers declarator					{ /* Parameter with name */ }
-	| declaration_specifiers abstract_declarator		{ /* Parameter with abstract declarator */ }
-	| declaration_specifiers							{ /* Parameter with type only */ }
+	: declaration_specifiers declarator					{ $$ = new FunctionParameter(NodePtr($1), NodePtr($2)); }
+	| declaration_specifiers abstract_declarator		{ /* Parameter with abstract declarator */ } // ignore
+	| declaration_specifiers							{ /* Parameter with type only */ } // OLD K&R STYLE IGNORE FOR NOW. 
 	;
 
 // NO LONGER REQURIED AS ONLY USED WITHIN K&R STYLE (DIRECT DECLARATOR) FUNCTION DECLARATION

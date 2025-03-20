@@ -18,7 +18,7 @@ void FunctionCall::EmitRISCV(std::ostream& stream, const std::string& dst_reg, C
 {
     std::string function_name;
     if (Identifier* ident = dynamic_cast<Identifier*>(function_.get())) {
-        function_name = ident->GetName();
+        function_name = ident->GetID();
     } else {
         throw std::runtime_error("Function call with non-identifier function expression not supported");
     }
