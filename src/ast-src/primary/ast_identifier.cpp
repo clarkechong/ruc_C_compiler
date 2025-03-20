@@ -9,7 +9,6 @@ Identifier::Identifier(std::string id) : id_(id) {
 void Identifier::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context& context) const 
 {
     if (context.scope_manager.VariableExists(id_)) {
-        stream << "MOTHERFUCKER";
         context.stack_manager.LoadVariableToRegister(stream, dst_reg, id_);
     } else {
         // TypeSpecifier type = TypeSpecifier::INT; // NEEDS TO KNOW THIS FROM PARENT
