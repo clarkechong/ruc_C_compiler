@@ -15,49 +15,42 @@ For::For(NodePtr initializer, NodePtr condition, NodePtr increment, NodePtr stat
 void For::EmitRISCV(std::ostream& stream, const std::string& dst_reg, Context& context) const 
 {
     std::string init_label = context.label_manager.CreateLabel("for_init");
-    std::string cond_label = context.label_manager.CreateLabel("for_cond");
-    std::string body_label = context.label_manager.CreateLabel("for_body");
-    std::string incr_label = context.label_manager.CreateLabel("for_incr");
+    std::string start_label = context.label_manager.CreateLabel("for_start");
+    std::string iteration_label = context.label_manager.CreateLabel("for_iteration");
     std::string end_label = context.label_manager.CreateLabel("for_end");
     
-    std::string cond_reg = context.register_manager.AllocateRegister();
-    
-    context.label_manager.PushLoopStart(cond_label);
-    context.label_manager.PushLoopUpdate(incr_label);
+    context.label_manager.PushLoopUpdate(iteration_label);
     context.label_manager.PushLoopEnd(end_label);
+    
+    std::string loop_reg = context.register_manager.AllocateRegister();
     
     stream << init_label << ":" << std::endl;
     if (initializer_) {
-        initializer_->EmitRISCV(stream, dst_reg, context);
+        initializer_->EmitRISCV(stream, loop_reg, context);
     }
     
-    stream << "    j " << cond_label << std::endl;
+    stream << start_label << ":" << std::endl;
     
-    stream << body_label << ":" << std::endl;
+    if (condition_) {
+        condition_->EmitRISCV(stream, loop_reg, context);
+        stream << "    beqz " << loop_reg << ", " << end_label << std::endl;
+    }
+    
     if (statement_) {
         statement_->EmitRISCV(stream, dst_reg, context);
     }
     
-    stream << incr_label << ":" << std::endl;
+    stream << iteration_label << ":" << std::endl;
     if (increment_) {
-        increment_->EmitRISCV(stream, dst_reg, context);
+        increment_->EmitRISCV(stream, loop_reg, context);
     }
     
-    stream << cond_label << ":" << std::endl;
-    if (condition_) {
-        condition_->EmitRISCV(stream, cond_reg, context);
-        stream << "    bnez " << cond_reg << ", " << body_label << std::endl;
-    } else {
-        stream << "    j " << body_label << std::endl;
-    }
-    
+    stream << "    j " << start_label << std::endl;
     stream << end_label << ":" << std::endl;
     
-    context.label_manager.PopLoopStart();
-    context.label_manager.PopLoopUpdate();
     context.label_manager.PopLoopEnd();
-    
-    context.register_manager.DeallocateRegister(cond_reg);
+    context.label_manager.PopLoopUpdate();
+    context.register_manager.DeallocateRegister(loop_reg);
 }
 
 void For::Print(std::ostream& stream, indent_t indent) const 

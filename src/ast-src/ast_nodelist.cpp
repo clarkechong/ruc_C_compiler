@@ -19,7 +19,6 @@ void NodeList::Print(std::ostream &stream, indent_t indent) const {
         if (node) {
             node->Print(stream, indent);
             
-            // if not the last node and not printing in a block context, add a separator
             if (node != nodes_.back()) {
                 stream << ", ";
             }

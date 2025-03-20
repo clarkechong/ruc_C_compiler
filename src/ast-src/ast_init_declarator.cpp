@@ -28,21 +28,20 @@ void InitDeclarator::EmitRISCV(std::ostream& stream, const std::string& dst_reg,
     declarator_->EmitRISCV(stream, dst_reg, context);
     
     if (initializer_) {
-        std::string temp_reg = context.register_manager.AllocateRegister();
+        initializer_->EmitRISCV(stream, dst_reg, context);
         
-        initializer_->EmitRISCV(stream, temp_reg, context);
+        // std::string temp_reg = context.register_manager.AllocateRegister();
+        // TypeSpecifier type = TypeSpecifier::INT;
+        // if (context.scope_manager.VariableExists(id)) {
+        //     type = context.scope_manager.GetVariable(id).type;
+        // }
         
-        TypeSpecifier type = TypeSpecifier::INT;
-        if (context.scope_manager.VariableExists(id)) {
-            type = context.scope_manager.GetVariable(id).type;
-        }
+        // int stack_offset = context.scope_manager.GetVariable(id).stack_offset;
+        // std::string store_instr = Context::GetStoreInstruction(type);
         
-        int stack_offset = context.scope_manager.GetVariable(id).stack_offset;
-        std::string store_instr = Context::GetStoreInstruction(type);
+        // stream << "    " << store_instr << " " << temp_reg << ", " << stack_offset << "(s0)\n";
         
-        stream << "    " << store_instr << " " << temp_reg << ", " << stack_offset << "(s0)\n";
-        
-        context.register_manager.DeallocateRegister(temp_reg);
+        // context.register_manager.DeallocateRegister(temp_reg);
     }
 }
 

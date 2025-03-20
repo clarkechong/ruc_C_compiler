@@ -3,17 +3,15 @@
         - type_specifier node
         - declarator
             - id
-        - value (NOT REQUIRED TO BE INITIALIZED)
     
-    e.g. int x = 5;
+    e.g. int x;
         - type_specifier = int
         - declarator = `x` node
             - id = "x"
-        - value = 5
 
-    hence this declaration class is inclusive of INITIALIZING DECLARATIONS.
-    this class is also intended for use in function parameters e.g. void myFunc (int x, char y);
-    such that parameter `int x` is classed as a (non-initializing) declaration.
+    Note: Initialization is now handled by InitDeclarator
+    This class is also intended for use in function parameters e.g. void myFunc (int x, char y);
+    such that parameter `int x` is classed as a declaration.
 */
 
 #pragma once
@@ -32,8 +30,6 @@ class Declaration : public Node
 {
     public:
         Declaration(NodePtr type, NodePtr declarator);
-        
-        Declaration(NodePtr type, NodePtr declarator, NodePtr value); // initializing constructor
 
         virtual void EmitRISCV(std::ostream &stream, const std::string &dst_reg, Context &context) const override;
         virtual void Print(std::ostream &stream, indent_t indent) const override;
@@ -42,7 +38,6 @@ class Declaration : public Node
     private:
         NodePtr type_;
         NodePtr declarator_;
-        NodePtr value_;
 };
 
 } // namespace ast

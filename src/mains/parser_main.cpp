@@ -17,8 +17,6 @@ int main(int argc, char** argv) {
 
     auto root = ParseAST(argv[1]);
     root->EmitRISCV(std::cout, "a0", context);
-    std::cout<<"\n\n\n";
-    root->Print(std::cout, 0);
 
     return 0;
     
