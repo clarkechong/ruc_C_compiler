@@ -260,7 +260,7 @@ void StackManager::StoreRegisterToVariable(std::ostream& dst, const std::string&
     try {
         Variable_s var = context_->scope_manager.GetVariable(id);
         
-        // TODO: Add more logic to handle array access - need to calculate the correct offset
+        // TODO: add more logic to handle array access - need to calculate the correct offset
         // based on the array index and element size, then add to the base address
         
         if (context_->scope_manager.InGlobalScope()) {
