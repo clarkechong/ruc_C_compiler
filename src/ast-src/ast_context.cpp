@@ -864,8 +864,10 @@ void RegisterManager::RestoreRegisters(std::ostream& dst) {
                 regs_float_[map_it->second] = 1;
             }
         } else {
-            dst << "    lw " << it->reg_name << ", " << it->stack_offset << "(s0)" << std::endl;
-            
+            std::regex a_reg_regex("^a[0-7]$");
+            if (!std::regex_match(it->reg_name, a_reg_regex)) {
+                dst << "    lw " << it->reg_name << ", " << it->stack_offset << "(s0)" << std::endl;
+            }
             auto map_it = register_map.find(it->reg_name);
             if (map_it != register_map.end()) {
                 regs_[map_it->second] = 1;
