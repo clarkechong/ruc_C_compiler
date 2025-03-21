@@ -3,7 +3,7 @@
 
 
 ## Project Structure
-The full passing compiler can be run from the base folder with all features implemented. The first attempt is in the 2025-langproc-cw-repo which was got too messy to work on quickly so we redesigned the compiler structure to make work on it faster. 
+Our full working compiler is in experimental v2 at 75/86 tests. The first try was in main, 2025-langproc-cw-repo, but we abandoned it due to the difficulty we had with adding new features.
 
 ```
 <langproc-2024-cw-risky-unprotected-compiling>/
