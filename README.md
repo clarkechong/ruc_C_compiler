@@ -1,6 +1,6 @@
-Here's the updated README with the branches section added:
-
 # IAC Compilers Coursework 2025 - `risky_unprotected_compiling`
+An ANSI-C (C90) to RISC-V compiler, completed as coursework for Imperial EIE.\
+\
 **Team Members:** Clarke Chong & Kevin Aubeeluck  
 
 ---
